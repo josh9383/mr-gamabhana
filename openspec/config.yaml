@@ -1,0 +1,29 @@
+# OpenSpec Configuration
+schema: spec-driven
+
+context: |
+  Ecosystem: A template-driven deployment for static site to be hosted on github pages or other static site hosting providers.
+  Build Engine: Python script that generates markdown, html files bases on site.json and per-idea meta.json files, jinja2 templates, theme and other static assets.
+  Tech stack: HTML5, CSS3, Bootstrap 5.3.x, Bootswatch 5.3.x, Vanilla JS (ES2020).
+  Architecture: Lean Layered / Service-Module Pattern. Zero-dependency frontend state modules with functional utilities. Pure service-based template file streams.
+  Constraints: Strictly vanilla stack. No frontend frameworks or external libraries (No React, Vue, jQuery, etc.). No inline styles or inline scripts. No unit tests.
+  Standards: Mobile-first, responsive, cross-browser compatibility (Last 2 versions of major browsers).
+
+rules:
+  proposal:
+    - Assess how structural changes affect the interface between the build engine and the atomic data and template assets and directories.
+    - Document explicit Constraints, Limitations, Assumptions, and Out-of-Scope items for every architectural change.
+    - As part of response to proposed change; include the list of files that would be created or updated.
+    - Do not change any file in content directory. These are user-generated metadata and content inputs.
+  specs:
+    - "Organize features using structured tracking tags like [REQ-001: Requirement Name] to guarantee direct traceability to code files."
+    - Limit the text body of each individual requirement specification to a maximum of 150 words.
+    - Mandate that every requirement includes clear Acceptance Criteria written strictly in the 'Given/When/Then' BDD format.
+  design:
+    - Maintain strict atomicity; artifacts generated in sire directory must be entirely self-contained with no shared runtime cross-dependencies.
+    - Enforce a single source of truth for frontend client-side state, utilizing a centralized coordinator module to manage dynamic DOM injection.
+    - UI assembly must rely 100% on programmatic DOM manipulation or template literals; zero production of inline script or style blocks.
+    - Core template files must use deterministic token strings for injectables to guarantee clean, safe string replacement passes.
+    - Structure utilities as stateless, procedural services optimized for filesystem streaming and isolated from front-end layout mechanisms.
+    - Structure implementation paths sequentially, isolating data-parsing or state logic steps from visual rendering tasks.
+    - Build engine must generate the static site artifacts under site folder strictly. seed content remains in content folder, jinja templates remain in templates folder. JS, CSS, images and other static assets remain under theme folder.

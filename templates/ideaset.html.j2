@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="{{ site.language }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ title }} | {{ site.title }}</title>
+    <meta name="description" content="{{ description }}">
+    <link rel="canonical" href="{{ canonical_url }}">
+    <link rel="stylesheet" href="{{ site.theme_stylesheet }}">
+    <link rel="stylesheet" href="{{ site.base_url }}/assets/style.css">
+</head>
+<body>
+<nav class="navbar navbar-expand navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="{{ site.base_url }}/">{{ site.title }}</a>
+    </div>
+</nav>
+<div class="watermark-overlay"></div>
+<main class="container py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ site.base_url }}/">गमभन</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ title }}</li>
+        </ol>
+    </nav>
+
+    <h1 class="h2">{{ title }}</h1>
+    <p class="lead">{{ items|length }} युक्त्या</p>
+
+    <div class="accordion" id="ideaset-accordion">
+        {% for item in items %}
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="ideaset-heading-{{ loop.index0 }}">
+                <button class="accordion-button collapsed " type="button" data-bs-toggle="collapse" data-bs-target="#ideaset-collapse-{{ loop.index0 }}" aria-expanded="{{ 'true' if loop.first else 'false' }}" aria-controls="ideaset-collapse-{{ loop.index0 }}">
+                    <strong>{{ item.title }}</strong>
+                </button>
+            </h2>
+            <div id="ideaset-collapse-{{ loop.index0 }}" class="accordion-collapse collapse" aria-labelledby="ideaset-heading-{{ loop.index0 }}" data-bs-parent="#ideaset-accordion" >
+                <div class="accordion-body">
+                    {% if item.description %}<p class="lead">{{ item.description }}</p>{% endif %}
+
+                    {% if not item.image_urls or item.image_urls|length == 0 %}
+                    <img class="card-img-top mb-3" src="{{ site.base_url }}/assets/card-fallback.png" alt="{{ item.title }}">
+                    {% elif item.image_urls|length == 1 %}
+                    <img class="card-img-top mb-3" src="{{ site.base_url }}{{ item.image_urls[0] }}" alt="{{ item.title }}">
+                    {% else %}
+                    {% set num_images = item.image_urls|length if item.image_urls|length <= 6 else 6 %}
+                    <div class="card-carousel card-carousel--{{ num_images }} mb-3">
+                        {% for img_url in item.image_urls[:6] %}
+                        <img src="{{ site.base_url }}{{ img_url }}" alt="{{ item.title }}" loading="lazy">
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <div class="idea-content">{{ item.content_html }}</div>
+
+                    <!-- a class="btn btn-outline-primary btn-sm mt-3" href="{{ item.url }}">पूर्ण युक्ती पहा</a -->
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</main>
+
+<script src="{{ site.bootstrap_script }}"></script>
+</body>
+</html>

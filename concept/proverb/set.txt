@@ -1,7 +1,0 @@
-###
-#TYPE:DTS
-#DEL:¦
-#TERM:¶
-#HEADERS:proverb¦meaning-mr¦usage¦meaning-en¦¶
-###
-आपलेच दात आणि आपलेच ओठ¦आपल्याच माणसाने चूक केल्यास अडचणीची परिस्थिती निर्माण होते.¦¦¦¶

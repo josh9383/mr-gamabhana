@@ -1,0 +1,36 @@
+---
+id: {{ id }}
+title: {{ title }}
+{% if description %}
+description: {{ description }}
+{% endif %}
+board: {{ board }}
+standard: {{ standard }}
+subject: {{ subject }}
+categories:
+{% for category in categories %}
+  - {{ category }}
+{% endfor %}
+concepts:
+{% for concept in concepts %}
+  - {{ concept }}
+{% endfor %}
+props:
+{% for prop in props %}
+  - {{ prop }}
+{% endfor %}
+ideasets:
+{% for ideaset in ideasets %}
+  - {{ ideaset }}
+{% endfor %}
+images:
+{% for image in images %}
+  - {{ image }}
+{% endfor %}
+---
+
+{{ content }}
+
+{% for image in images %}
+![{{ loop.index }} {{ image }}](./{{ image }})
+{% endfor %}

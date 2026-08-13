@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="{{ site.language }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ site.title }}</title>
+    <meta name="description" content="{{ site.description }}">
+    <link rel="canonical" href="{{ site.base_url }}/">
+    <link rel="stylesheet" href="{{ site.theme_stylesheet }}">
+    <link rel="stylesheet" href="{{ site.base_url }}/assets/style.css">
+</head>
+<body>
+<nav class="navbar navbar-expand navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="{{ site.base_url }}/">{{ site.title }}</a>
+    </div>
+</nav>
+
+<main class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-10">
+            <h1 class="h2">{{ site.title }}</h1>
+            <p class="lead">{{ site.description }}</p>
+
+            <div class="search mb-4">
+                <input id="search-input" type="search" class="form-control form-control-lg phonetic-input" placeholder="शोधा...">
+            </div>
+
+            <div class="row g-4" id="search-page" data-base-url="{{ site.base_url }}">
+                <aside class="facets col-12 col-lg-3">
+                    <div class="facet-actions">
+                        <button id="clear-facets" type="button" class="btn btn-outline-secondary btn-sm">↻</button>
+                    </div>
+                    {% for type, label in facet_groups %}
+                    <div class="facet" data-facet="{{ type }}">
+                        <h3>{{ label }}</h3>
+                        <div class="facet-items"></div>
+                    </div>
+                    {% endfor %}
+                </aside>
+                <section class="search-results col-12 col-lg-9">
+                    <p id="result-count" class="result-count"></p>
+                    <div id="search-results" class="catalogue-grid"></div>
+                </section>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="{{ site.bootstrap_script }}"></script>
+<script src="{{ site.base_url }}/assets/minisearch.min.js"></script>
+<script src="{{ site.base_url }}/assets/app.js"></script>
+<script differ src="https://www.gamabhana.com/gamabhanaWidget/?mode=custom&l=0&k=1&n=&c=phonetic-input" ></script>
+</body>
+</html>

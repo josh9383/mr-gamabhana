@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="{{ site.language }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ title }} | {{ site.title }}</title>
+    <meta name="description" content="{{ description }}">
+    <link rel="canonical" href="{{ site.base_url }}/ideas/{{ id }}/">
+    <link rel="stylesheet" href="{{ site.theme_stylesheet }}">
+    <link rel="stylesheet" href="{{ site.base_url }}/assets/style.css">
+</head>
+<body>
+<nav class="navbar navbar-expand navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="{{ site.base_url }}/">{{ site.title }}</a>
+    </div>
+</nav>
+<div class="watermark-overlay"></div>
+<main class="container py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ site.base_url }}/">गमभन</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ title }}</li>
+        </ol>
+    </nav>
+
+    <article>
+        <header>
+            <h1 class="h2">{{ title }}</h1>
+            {% if description %}<p class="lead">{{ description }}</p>{% endif %}
+        </header>
+
+        <div class="d-flex flex-wrap gap-2 mb-4">
+            {% if "categories" in catalogue_attributes %}
+            {% for category in categories %}
+            <a class="badge text-bg-info text-decoration-none" href="{{ site.base_url }}/categories/{{ category_slugs[loop.index0] }}/">{{ category }}</a>
+            {% endfor %}
+            {% endif %}
+            {% if "concepts" in catalogue_attributes %}
+            {% for concept in concepts %}
+            <a class="badge text-bg-warning text-decoration-none" href="{{ site.base_url }}/concepts/{{ concept_slugs[loop.index0] }}/">{{ concept }}</a>
+            {% endfor %}
+            {% endif %}
+            {% if "props" in catalogue_attributes %}
+            {% for prop in props %}
+            <a class="badge text-bg-dark text-decoration-none" href="{{ site.base_url }}/props/{{ prop_slugs[loop.index0] }}/">{{ prop }}</a>
+            {% endfor %}
+            {% endif %}
+            {% for ideaset in ideasets %}
+            <a class="badge text-bg-primary text-decoration-none" href="{{ site.base_url }}/ideasets/{{ ideaset_slugs[loop.index0] }}/">{{ ideaset }}</a>
+            {% endfor %}
+        </div>
+
+        <section class="idea-images row row-cols-3 g-3">
+        {% for image_url in image_urls %}
+            <div class="col">
+                <div class="bg-light border rounded overflow-hidden">
+                    <img src="{{ image_url }}" class="img-fluid" alt="Grid Image" />
+                </div>
+            </div>
+        {% endfor %}
+        </section>
+
+        <section class="idea-content mt-4">
+            {{ content_html }}
+        </section>
+
+    </article>
+</main>
+
+<script src="{{ site.bootstrap_script }}"></script>
+<script src="{{ site.base_url }}/assets/app.js"></script>
+<script>
+makeAccordion(".idea-content");
+</script>
+</body>
+</html>
