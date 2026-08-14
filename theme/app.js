@@ -1,7 +1,7 @@
 async function loadIndex() {
-    const response = await fetch("ideas.json");
+    const response = await fetch("meta.json");
     if (!response.ok) {
-        throw new Error(`Could not load ideas.json: ${response.status}`);
+        throw new Error(`Could not load meta.json: ${response.status}`);
     }
     return response.json();
 }
@@ -118,7 +118,7 @@ function phoneticToDevanagari(input) {
     return output.join("");
 }
 
-async function initSearchPage() {
+async function initPage() {
     const page = document.getElementById("search-page");
     if (!page) return;
 
@@ -127,16 +127,21 @@ async function initSearchPage() {
     const facetsRoot = document.querySelector(".facets");
     const resultsContainer = document.getElementById("search-results");
     const resultCount = document.getElementById("result-count");
+    const sentinel = document.getElementById("search-more");
     const clearButton = document.getElementById("clear-facets");
 
     const data = await loadIndex();
     const ideas = data.ideas;
-    const catalogueAttributes = (data.site && data.site.catalogue_attributes) || [];
-    const facetTypes = (data.site && data.site.facet_types) || [...catalogueAttributes, "standard", "subject"];
+    const facetTypes = (data.site && data.site.facet_types) || [];
 
     const state = { q: "" };
     facetTypes.forEach((type) => { state[type] = []; });
+    const tomSelects = {};
     let miniSearch = null;
+
+    const PAGE_SIZE = 6;
+    let loadedPage = 0;
+    let loadingMore = false;
 
     const facetValues = (idea, type) => {
         if (type === "standard") return [String(idea.standard)];
@@ -177,6 +182,9 @@ async function initSearchPage() {
     const renderFacets = () => {
         facetsRoot.querySelectorAll(".facet").forEach((group) => {
             const type = group.dataset.facet;
+            const ts = tomSelects[type];
+            if (!ts) return;
+
             const counts = {};
             filteredByOthers(type).forEach((idea) => {
                 facetValues(idea, type).forEach((value) => {
@@ -186,15 +194,46 @@ async function initSearchPage() {
 
             const values = [...new Set(ideas.flatMap((idea) => facetValues(idea, type)))]
                 .sort((a, b) => a.localeCompare(b, "mr"));
+            const wanted = new Set(values);
 
-            group.querySelector(".facet-items").innerHTML = values.map((value) => `
-                <label class="facet-item">
-                    <input type="checkbox" data-facet="${type}" value="${escapeHtml(value)}"
-                        ${state[type].includes(value) ? "checked" : ""}>
-                    <span>${escapeHtml(value)}</span>
-                    <small>(${counts[value] || 0})</small>
-                </label>
-            `).join("");
+            Object.keys(ts.options).forEach((value) => {
+                if (!wanted.has(value)) ts.removeOption(value);
+            });
+            values.forEach((value) => {
+                ts.addOption({ value, text: value, count: counts[value] || 0 });
+            });
+            ts.refreshOptions(false);
+        });
+    };
+
+    const initFacetSelects = () => {
+        facetsRoot.querySelectorAll(".facet").forEach((group) => {
+            const type = group.dataset.facet;
+            const select = group.querySelector(".facet-select");
+            const label = group.dataset.label;
+            const ts = new TomSelect(select, {
+                plugins: ["remove_button", "clear_button"],
+                create: false,
+                maxItems: null,
+                allowEmptyOption: false,
+                placeholder: label,
+                closeAfterSelect: false,
+                hideSelected: false,
+                render: {
+                    option: (data, escape) => `
+                        <div class="ts-option">
+                            <span>${escape(data.text)}</span>
+                            <small class="ts-option-count">(${escape(String(data.count))})</small>
+                        </div>`,
+                    item: (data, escape) => `<div>${escape(data.text)}</div>`,
+                },
+                onChange: (values) => {
+                    state[type] = values;
+                    writeStateToURL();
+                    resetAndRender();
+                },
+            });
+            tomSelects[type] = ts;
         });
     };
 
@@ -213,35 +252,143 @@ async function initSearchPage() {
         return `<div class="card-carousel card-carousel--${count}">${imgElements}</div>`;
     };
 
+    const cardHtml = (idea) => {
+        const footerBadgesHtml = (idea.footer_badges || []).map(badge => {
+            let badgeExtClass = `badge-${badge.url.split("/").filter(Boolean)[0]}`;
+            return `<a class="badge rounded-pill bg-info ${badgeExtClass} text-decoration-none" href="${escapeHtml(baseUrl + badge.url)}">${escapeHtml(badge.value)}</a>`
+        }
+        ).join("");
+        const searchText = escapeHtml(`${idea.title} ${idea.description || ""}`.trim());
+
+        return `
+        <div class="card catalogue-card" data-search="${searchText}">
+            ${imageCapHtml(idea)}
+            <div class="card-body">
+                <h2 class="card-title h5"><a class="text-decoration-none" href="${escapeHtml(baseUrl + idea.url)}" >${escapeHtml(idea.title)}</a></h2>
+                ${idea.description ? `<p class="card-text">${escapeHtml(idea.description)}</p>` : ""}
+            </div>
+            ${footerBadgesHtml ? `<div class="card-footer d-flex flex-wrap gap-1">${footerBadgesHtml}</div>` : ""}
+        </div>
+        `;
+    };
+
+    const updateSentinel = (hasMore, total) => {
+        if (!sentinel) return;
+        if (!hasMore) {
+            sentinel.innerHTML = total > 0 ? '<p class="end-of-list">सर्व युक्त्या पाहिल्या</p>' : "";
+            observerUnobserve();
+        } else {
+            sentinel.innerHTML = "";
+        }
+    };
+
     const renderResults = () => {
         const results = currentResults();
         resultCount.textContent = `${results.length} युक्त्या`;
 
         if (!results.length) {
             resultsContainer.innerHTML = '<p class="no-results">कोणतीही युक्ती सापडली नाही</p>';
+            updateSentinel(false, 0);
             return;
         }
 
-        resultsContainer.innerHTML = results.map((idea) => {
-            const propsHtml = facetTypes.includes("props")
-                ? (idea.props || []).map((prop, index) => {
-                    const slug = (idea.prop_slugs || [])[index];
-                    return `<a class="badge text-bg-info text-decoration-none" href="${escapeHtml(baseUrl + "/props/" + slug + "/")}">${escapeHtml(prop)}</a>`;
-                }).join("")
-                : "";
-            const searchText = escapeHtml(`${idea.title} ${idea.description || ""}`.trim());
+        if (typeof IntersectionObserver === "undefined") {
+            loadedPage = Math.max(loadedPage, Math.ceil(results.length / PAGE_SIZE) - 1);
+        }
 
-            return `
-            <div class="card catalogue-card" data-search="${searchText}">
-                ${imageCapHtml(idea)}
-                <div class="card-body">
-                    <h2 class="card-title h5"><a class="text-decoration-none" href="${escapeHtml(baseUrl + idea.url)}" >${escapeHtml(idea.title)}</a></h2>
-                    ${idea.description ? `<p class="card-text">${escapeHtml(idea.description)}</p>` : ""}
-                </div>
-                ${propsHtml ? `<div class="card-footer d-flex flex-wrap gap-1">${propsHtml}</div>` : ""}
-            </div>
-            `;
-        }).join("");
+        const visible = results.slice(0, (loadedPage + 1) * PAGE_SIZE);
+        resultsContainer.innerHTML = visible.map(cardHtml).join("");
+        updateSentinel(visible.length < results.length, results.length);
+    };
+
+    const sentinelInReach = () => {
+        if (!sentinel) return false;
+        const rect = sentinel.getBoundingClientRect();
+        return rect.top <= window.innerHeight + 200;
+    };
+
+    const renderPage = () => {
+        const results = currentResults();
+        const visible = results.slice(0, (loadedPage + 1) * PAGE_SIZE);
+        resultsContainer.innerHTML = visible.map(cardHtml).join("");
+        updateSentinel(visible.length < results.length, results.length);
+        return visible.length < results.length;
+    };
+
+    const loadNextPage = () => {
+        if (loadingMore) return;
+        const results = currentResults();
+        if ((loadedPage + 1) * PAGE_SIZE >= results.length) return;
+        loadingMore = true;
+        loadedPage += 1;
+        loadingMore = false;
+        let hasMore = renderPage();
+        while (hasMore && sentinelInReach()) {
+            loadedPage += 1;
+            hasMore = renderPage();
+        }
+    };
+
+    const resetAndRender = () => {
+        loadedPage = 0;
+        loadingMore = false;
+        render();
+    };
+
+    let observer = null;
+    const observerUnobserve = () => {
+        if (observer && sentinel) observer.unobserve(sentinel);
+    };
+    if (sentinel && typeof IntersectionObserver !== "undefined") {
+        observer = new IntersectionObserver((entries) => {
+            if (entries.some((entry) => entry.isIntersecting)) {
+                loadNextPage();
+            }
+        }, { rootMargin: "200px 0px" });
+        observer.observe(sentinel);
+    }
+
+    const autosuggestBox = document.getElementById("autosuggest");
+    let suggestTimer = null;
+    let activeSuggestionIndex = -1;
+
+    const hideAutosuggest = () => {
+        activeSuggestionIndex = -1;
+        if (autosuggestBox) autosuggestBox.hidden = true;
+    };
+
+    const renderAutosuggest = () => {
+        if (!autosuggestBox) return;
+        const query = phoneticToDevanagari(state.q.trim());
+        if (!query) {
+            hideAutosuggest();
+            return;
+        }
+        const suggestions = miniSearch.autoSuggest(query, { fuzzy: 0.2 }).slice(0, 8);
+        if (!suggestions.length) {
+            hideAutosuggest();
+            return;
+        }
+        autosuggestBox.innerHTML = suggestions.map((suggestion, index) => `
+            <button type="button" class="autosuggest-item${index === activeSuggestionIndex ? " is-active" : ""}"
+                data-suggestion-index="${index}" data-suggestion="${escapeHtml(suggestion.suggestion)}">
+                ${escapeHtml(suggestion.suggestion)}
+            </button>
+        `).join("");
+        autosuggestBox.hidden = false;
+    };
+
+    const applySuggestion = (suggestion) => {
+        state.q = suggestion;
+        input.value = suggestion;
+        hideAutosuggest();
+        writeStateToURL();
+        resetAndRender();
+    };
+
+    const scheduleAutosuggest = () => {
+        clearTimeout(suggestTimer);
+        suggestTimer = setTimeout(renderAutosuggest, 200);
     };
 
     const writeStateToURL = () => {
@@ -265,41 +412,84 @@ async function initSearchPage() {
 
     const applyState = () => {
         input.value = state.q;
-        writeStateToURL();
         render();
+        facetTypes.forEach((type) => {
+            const ts = tomSelects[type];
+            if (ts) ts.setValue(state[type], true);
+        });
+        writeStateToURL();
     };
 
     input.addEventListener("input", () => {
         state.q = input.value;
         writeStateToURL();
-        render();
+        resetAndRender();
+        scheduleAutosuggest();
     });
 
-    facetsRoot.addEventListener("change", (event) => {
-        const checkbox = event.target;
-        if (!checkbox.matches('input[type="checkbox"][data-facet]')) return;
-        const type = checkbox.dataset.facet;
-        const value = checkbox.value;
-        if (checkbox.checked) {
-            if (!state[type].includes(value)) state[type].push(value);
-        } else {
-            state[type] = state[type].filter((v) => v !== value);
+    document.addEventListener("click", (event) => {
+        if (!(input && input.contains(event.target)) && autosuggestBox && !autosuggestBox.contains(event.target)) {
+            hideAutosuggest();
         }
-        writeStateToURL();
-        render();
+    });
+
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+            hideAutosuggest();
+        }
+    });
+
+    if (autosuggestBox) {
+        autosuggestBox.addEventListener("click", (event) => {
+            const item = event.target.closest("[data-suggestion]");
+            if (item) applySuggestion(item.dataset.suggestion);
+        });
+
+        autosuggestBox.addEventListener("mousedown", (event) => {
+            event.preventDefault();
+        });
+    }
+
+    input.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowDown") {
+            event.preventDefault();
+            const items = autosuggestBox ? [...autosuggestBox.querySelectorAll(".autosuggest-item")] : [];
+            if (!items.length) return;
+            activeSuggestionIndex = Math.min(activeSuggestionIndex + 1, items.length - 1);
+            items.forEach((item, index) => item.classList.toggle("is-active", index === activeSuggestionIndex));
+        } else if (event.key === "ArrowUp") {
+            event.preventDefault();
+            const items = autosuggestBox ? [...autosuggestBox.querySelectorAll(".autosuggest-item")] : [];
+            if (!items.length) return;
+            activeSuggestionIndex = Math.max(activeSuggestionIndex - 1, 0);
+            items.forEach((item, index) => item.classList.toggle("is-active", index === activeSuggestionIndex));
+        } else if (event.key === "Enter") {
+            const items = autosuggestBox ? [...autosuggestBox.querySelectorAll(".autosuggest-item")] : [];
+            const active = items[activeSuggestionIndex];
+            if (active && !autosuggestBox.hidden) {
+                event.preventDefault();
+                applySuggestion(active.dataset.suggestion);
+            }
+        }
     });
 
     clearButton.addEventListener("click", () => {
-        facetTypes.forEach((type) => { state[type] = []; });
+        facetTypes.forEach((type) => {
+            state[type] = [];
+            const ts = tomSelects[type];
+            if (ts) ts.clear(true);
+        });
         state.q = "";
+        input.value = "";
         writeStateToURL();
-        render();
+        resetAndRender();
+        hideAutosuggest();
     });
 
     miniSearch = new MiniSearch({
         fields: ["title", "description", "board", "standard", "subject", "categories", "concepts", "props", "ideasets"],
         boost: { title: 2 },
-        storeFields: ["id", "title", "description", "url", "props", "prop_slugs", "image_urls"],
+        storeFields: ["id", "title", "description", "url", "props", "prop_slugs", "image_urls", "footer_badges"],
         tokenize: searchTokenize,
         processTerm: (term) => term.toLowerCase(),
         searchOptions: {
@@ -312,6 +502,7 @@ async function initSearchPage() {
     miniSearch.addAll(ideas);
 
     readStateFromURL();
+    initFacetSelects();
     applyState();
 }
 
@@ -416,14 +607,14 @@ function makeAccordion(selector) {
 }
 
 function init() {
-    // Catalogue pages do not depend on ideas.json.
+    // Catalogue pages do not depend on meta.json.
     // This makes their search work even when hosted
     // under a GitHub Pages project path.
     initCatalogueSearch();
 
-    // The home page (the search page) needs ideas.json for the MiniSearch index.
+    // The home page (the search page) needs meta.json for the MiniSearch index.
     if (document.getElementById("search-page")) {
-        initSearchPage().catch(error => {
+        initPage().catch(error => {
             console.error("Home page index could not be loaded:", error);
         });
     }

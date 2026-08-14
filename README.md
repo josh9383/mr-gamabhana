@@ -21,7 +21,7 @@ The build generates:
 - Board, standard, subject, category, and tag catalogue landing pages.
 - Individual pages for every board, standard, subject, category, and tag, each with MiniSearch filtering over the page's own cards.
 - Client-side searchable/filterable catalogue pages.
-- `ideas.json` for client-side search.
+- `meta.json` for client-side search.
 - `sitemap.xml`.
 
 ## Local setup

@@ -10,10 +10,22 @@
     <link rel="stylesheet" href="{{ site.base_url }}/assets/style.css">
 </head>
 <body>
-<nav class="navbar navbar-expand navbar-dark bg-primary">
-    <div class="container">
-        <a class="navbar-brand" href="{{ site.base_url }}/">{{ site.title }}</a>
-    </div>
+<nav class="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ site.base_url }}/">{{ site.title }}</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSections" aria-controls="navbarSections" aria-expanded="true" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="navbar-collapse collapse" id="navbarSections" style="">
+                <ul class="navbar-nav me-auto">
+                {% for key, title, path_name in menu_groups %}
+                    <li class="nav-item" >
+                        <a class="nav-link" href="{{ site.base_url }}/{{ path_name }}/">{{ title }}</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
 </nav>
 <div class="watermark-overlay"></div>
 <main class="container py-4">

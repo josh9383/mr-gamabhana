@@ -17,23 +17,97 @@ SITE = ROOT / "site"
 DEFAULT_THEME_STYLESHEET = "https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/vapor/bootstrap.min.css"
 DEFAULT_BOOTSTRAP_SCRIPT = "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
 
-# key -> (path_name, title, description, idea_field, mode)
-# mode "single" reads a scalar field; mode "multi" reads an array field.
-CATALOGUE_DEFS = {
-    "boards": ("boards", "मंडळे", "मंडळांनुसार युक्त्या", "board", "single"),
-    "standards": ("standards", "इयत्ता", "इयत्तांनुसार युक्त्या", "standard", "single"),
-    "subjects": ("subjects", "विषय", "विषयांनुसार युक्त्या", "subject", "single"),
-    "categories": ("categories", "विभाग", "विभागांनुसार युक्त्या", "categories", "multi"),
-    "concepts": ("concepts", "संकल्पना", "संकल्पनांनुसार युक्त्या", "concepts", "multi"),
-    "props": ("props", "साहित्य", "साहित्यानुसार युक्त्या", "props", "multi"),
-    "ideasets" : ("ideasets", "युक्तीसंच", "युक्तीसंचानुसार युक्त्या", "ideasets", "multi"),
+DEFAULT_CATALOGUES = {
+    "boards": {
+        "path_name": "boards",
+        "title": "मंडळे",
+        "description": "मंडळांनुसार युक्त्या",
+        "field": "board",
+        "mode": "single",
+        "facet": False,
+        "menu": False,
+        "footer": False,
+    },
+    "standard": {
+        "path_name": "standards",
+        "title": "इयत्ता",
+        "description": "इयत्तांनुसार युक्त्या",
+        "field": "standard",
+        "mode": "single",
+        "facet": True,
+        "menu": False,
+        "footer": False,
+    },
+    "subject": {
+        "path_name": "subjects",
+        "title": "विषय",
+        "description": "विषयांनुसार युक्त्या",
+        "field": "subject",
+        "mode": "single",
+        "facet": True,
+        "menu": False,
+        "footer": False,
+    },
+    "categories": {
+        "path_name": "categories",
+        "title": "विभाग",
+        "description": "विभागांनुसार युक्त्या",
+        "field": "categories",
+        "mode": "multi",
+        "facet": True,
+        "menu": False,
+        "footer": False,
+    },
+    "concepts": {
+        "path_name": "concepts",
+        "title": "संकल्पना",
+        "description": "संकल्पनांनुसार युक्त्या",
+        "field": "concepts",
+        "mode": "multi",
+        "facet": True,
+        "menu": False,
+        "footer": False,
+    },
+    "props": {
+        "path_name": "props",
+        "title": "साहित्य",
+        "description": "साहित्यानुसार युक्त्या",
+        "field": "props",
+        "mode": "multi",
+        "facet": True,
+        "menu": True,
+        "footer": True,
+    },
+    "ideasets": {
+        "path_name": "ideasets",
+        "title": "युक्तीसंच",
+        "description": "युक्तीसंचानुसार युक्त्या",
+        "field": "ideasets",
+        "mode": "multi",
+        "facet": False,
+        "menu": True,
+        "footer": True,
+    },
 }
-
-FACET_EXTRA_TYPES = [("standard", "इयत्ता"), ("subject", "विषय")]
 
 
 def make_slug(value):
     return anyascii(slugify(str(value))) or "item"
+
+
+def load_catalogue_defs(site):
+    configured = site.get("catalogues")
+    if configured:
+        normalized = {}
+        for k, v in configured.items():
+            normalized[k] = {
+                "facet": True,
+                "menu": False,
+                "footer": False,
+                **v
+            }
+        return normalized
+    return DEFAULT_CATALOGUES
 
 
 def load_site():
@@ -173,7 +247,43 @@ def build_ideasets(ideas, ideaset_map, order):
     return sets
 
 
-def idea_card(idea):
+def footer_badges_for(idea, catalogue_defs, footer_types):
+    badges = []
+    for key in footer_types:
+        definition = catalogue_defs[key]
+        field = definition["field"]
+        mode = definition["mode"]
+        path_name = definition["path_name"]
+
+        if mode == "multi":
+            values = idea.get(field) or []
+            # For multi-mode, let's look up slugs.
+            # E.g. categories -> category_slugs, props -> prop_slugs, ideasets -> ideaset_slugs
+            slug_key = f"{field.rstrip('s')}_slugs" if field != "ideasets" else "ideaset_slugs"
+            slugs = idea.get(slug_key) or []
+            # Zip values and slugs
+            for val, slug in zip(values, slugs):
+                if val and slug:
+                    badges.append({
+                        "value": val,
+                        "url": f"/{path_name}/{slug}/"
+                    })
+        else:
+            val = idea.get(field)
+            if val is not None and val != "":
+                # E.g. standard -> standard_slug, subject -> subject_slug, board -> board_slug
+                slug_key = f"{field}_slug"
+                slug = idea.get(slug_key)
+                if not slug:
+                    slug = make_slug(val)
+                badges.append({
+                    "value": str(val),
+                    "url": f"/{path_name}/{slug}/"
+                })
+    return badges
+
+
+def idea_card(idea, catalogue_defs, footer_types):
     return {
         "title": idea["title"],
         "description": idea["description"],
@@ -186,11 +296,12 @@ def idea_card(idea):
         "props": idea["props"],
         "prop_slugs": idea["prop_slugs"],
         "image_urls": idea["image_urls"],
+        "footer_badges": footer_badges_for(idea, catalogue_defs, footer_types),
         "count": None,
     }
 
 
-def home_idea_items(ideas):
+def home_idea_items(ideas, catalogue_defs, footer_types):
     return [
         {
             "id": idea["id"],
@@ -209,6 +320,7 @@ def home_idea_items(ideas):
             "ideasets": idea["ideasets"],
             "ideaset_slugs": idea["ideaset_slugs"],
             "image_urls": idea["image_urls"],
+            "footer_badges": footer_badges_for(idea, catalogue_defs, footer_types),
         }
         for idea in ideas
     ]
@@ -259,10 +371,11 @@ def main():
     site = load_site()
     theme_site = resolve_theme(site)
 
+    catalogue_defs = load_catalogue_defs(site)
     requested = site.get("catalogue_attributes") or []
-    active_types = [key for key in requested if key in CATALOGUE_DEFS]
+    active_types = [key for key in requested if key in catalogue_defs]
     if not active_types:
-        active_types = list(CATALOGUE_DEFS)
+        active_types = list(catalogue_defs)
 
     ideaset_map, ideaset_order = load_ideasets()
     ideas = load_ideas(ideaset_map)
@@ -283,9 +396,20 @@ def main():
     ideaset_template = env.get_template("ideaset.html.j2")
     sitemap_template = env.get_template("sitemap.xml.j2")
 
+    menu_groups = [
+        (key, catalogue_defs[key]["title"], catalogue_defs[key]["path_name"])
+        for key in active_types
+        if catalogue_defs[key]["menu"]
+    ]
+    footer_types = [
+        key for key in active_types
+        if catalogue_defs[key]["footer"]
+    ]
+
     base_context = {
         "site": theme_site,
         "catalogue_attributes": active_types,
+        "menu_groups": menu_groups,
     }
 
     catalogues = {}
@@ -293,20 +417,25 @@ def main():
         if key == "ideasets":
             catalogues[key] = ideaset_catalogue_items(ideasets)
         else:
-            path_name, _title, _description, field, mode = CATALOGUE_DEFS[key]
-            catalogues[key] = catalogue_items(ideas, path_name, field, mode)
+            definition = catalogue_defs[key]
+            catalogues[key] = catalogue_items(
+                ideas,
+                definition["path_name"],
+                definition["field"],
+                definition["mode"],
+            )
 
     # Home page (the idea set search experience).
-    facet_types = [key for key in active_types if key != "ideasets"] + ["standard", "subject"]
+    facet_types = [key for key in active_types if catalogue_defs[key]["facet"]]
     facet_groups = [
-        (key, CATALOGUE_DEFS[key][1])
+        (key, catalogue_defs[key]["title"])
         for key in active_types
-        if key != "ideasets"
-    ] + FACET_EXTRA_TYPES
+        if catalogue_defs[key]["facet"]
+    ]
     site["facet_types"] = facet_types
 
     (SITE / "index.html").write_text(
-        home_template.render(site=theme_site, facet_groups=facet_groups),
+        home_template.render(site=theme_site, facet_groups=facet_groups, menu_groups=menu_groups),
         encoding="utf-8"
     )
 
@@ -341,7 +470,7 @@ def main():
         )
 
     # Ideas catalogue landing page (every idea).
-    idea_items = [idea_card(idea) for idea in ideas]
+    idea_items = [idea_card(idea, catalogue_defs, footer_types) for idea in ideas]
     (SITE / "ideas" / "index.html").write_text(
         catalogue_template.render(
             **base_context,
@@ -384,7 +513,12 @@ def main():
 
     # Catalogue landing pages and individual catalogue pages.
     for key in active_types:
-        path_name, title, description, field, mode = CATALOGUE_DEFS[key]
+        definition = catalogue_defs[key]
+        path_name = definition["path_name"]
+        title = definition["title"]
+        description = definition["description"]
+        field = definition["field"]
+        mode = definition["mode"]
         items = catalogues[key]
         landing_dir = SITE / path_name
         landing_dir.mkdir(parents=True, exist_ok=True)
@@ -413,7 +547,7 @@ def main():
                     title=item["title"],
                     description=f"{description}: {item['title']}",
                     canonical_url=f"{site['base_url']}/{path_name}/{make_slug(item['title'])}/",
-                    items=[idea_card(c) for c in matching],
+                    items=[idea_card(c, catalogue_defs, footer_types) for c in matching],
                 ),
                 encoding="utf-8"
             )
@@ -421,11 +555,11 @@ def main():
     # Client-side index.
     index_payload = {
         "site": site,
-        "ideas": home_idea_items(ideas),
+        "ideas": home_idea_items(ideas, catalogue_defs, footer_types),
         "catalogues": catalogues,
     }
 
-    (SITE / "ideas.json").write_text(
+    (SITE / "meta.json").write_text(
         json.dumps(index_payload, ensure_ascii=False, indent=2),
         encoding="utf-8"
     )
@@ -439,7 +573,7 @@ def main():
     ]
 
     for key in active_types:
-        path_name = CATALOGUE_DEFS[key][0]
+        path_name = catalogue_defs[key]["path_name"]
         urls.append(f"{site['base_url']}/{path_name}/")
         if key == "ideasets":
             continue
@@ -456,6 +590,8 @@ def main():
     shutil.copy(THEME / "style.css", SITE / "assets" / "style.css")
     shutil.copy(THEME / "app.js", SITE / "assets" / "app.js")
     shutil.copy(THEME / "assets" / "minisearch.min.js", SITE / "assets" / "minisearch.min.js")
+    shutil.copy(THEME / "assets" / "tom-select.min.js", SITE / "assets" / "tom-select.min.js")
+    shutil.copy(THEME / "assets" / "tom-select.bootstrap5.min.css", SITE / "assets" / "tom-select.bootstrap5.min.css")
     shutil.copy(THEME / "assets" / "card-fallback.png", SITE / "assets" / "card-fallback.png")
 
     print(f"Built {len(ideas)} ideas across {len(ideasets)} idea sets.")

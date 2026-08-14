@@ -10,10 +10,31 @@
     <link rel="stylesheet" href="{{ site.base_url }}/assets/style.css">
 </head>
 <body>
-<nav class="navbar navbar-expand navbar-dark bg-primary">
-    <div class="container">
-        <a class="navbar-brand" href="{{ site.base_url }}/">{{ site.title }}</a>
-    </div>
+<nav class="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ site.base_url }}/">{{ site.title }}</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSections" aria-controls="navbarSections" aria-expanded="true" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="navbar-collapse collapse" id="navbarSections" style="">
+                <ul class="navbar-nav me-auto">
+                {% for key, title, path_name in menu_groups %}
+                    <li class="nav-item" >
+                        <a class="nav-link" href="{{ site.base_url }}/{{ path_name }}/">{{ title }}</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <div class="search ms-auto">
+                    <div class="input-group">
+                        <span class="input-group-text" id="search-icon">
+                            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                        </span>
+                         <input id="search-input" type="search" class="catalogue-search form-control phonetic-input" placeholder="शोधा..." autocomplete="off" aria-label="शोधा">
+                    </div>
+                    <div id="autosuggest" class="autosuggest" hidden></div>
+                </div>
+            </div>
+        </div>
 </nav>
 
 <main class="container py-4">
@@ -26,10 +47,6 @@
 
     <h1 class="h2">{{ title }}</h1>
     <p class="lead">{{ description }}</p>
-
-    <div class="search mb-4">
-        <input class="catalogue-search form-control phonetic-input" type="search" placeholder="शोधा...">
-    </div>
 
     <div class="catalogue-grid" id="catalogue-list">
         {% for item in items %}
@@ -50,15 +67,15 @@
                 <h2 class="card-title h5"><a class="text-decoration-none" href="{{ item.url }}" >{{ item.title }}</a></h2>
                 {% if item.description %}<p class="card-text">{{ item.description }}</p>{% endif %}
             </div>
-            {% if "props" in catalogue_attributes and item.props %}
-            <div class="card-footer d-flex flex-wrap gap-1">
-                {% for prop in item.props %}
-                <a class="badge text-bg-light text-decoration-none" href="{{ site.base_url }}/props/{{ item.prop_slugs[loop.index0] }}/">{{ prop }}</a>
-                {% endfor %}
-            </div>
-            {% elif item.count is not none %}
+            {% if item.count is not none %}
             <div class="card-footer">
                 <small>युक्त्या ({{ item.count }})</small>
+            </div>
+            {% elif item.footer_badges %}
+            <div class="card-footer d-flex flex-wrap gap-1">
+                {% for badge in item.footer_badges %}
+                <a class="badge text-bg-light text-decoration-none" href="{{ site.base_url }}{{ badge.url }}">{{ badge.value }}</a>
+                {% endfor %}
             </div>
             {% endif %}
         </div>
@@ -69,6 +86,5 @@
 <script src="{{ site.bootstrap_script }}"></script>
 <script src="{{ site.base_url }}/assets/minisearch.min.js"></script>
 <script src="{{ site.base_url }}/assets/app.js"></script>
-<script differ src="https://www.gamabhana.com/gamabhanaWidget/?mode=custom&l=0&k=1&n=&c=phonetic-input" ></script>
 </body>
 </html>

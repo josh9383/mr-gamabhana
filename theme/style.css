@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap');
 
 * {
-    font-family: "Noto Sans", sans-serif !important;
+    font-family: "Noto Sans", sans-serif;
 }
 
   .watermark-bg {
@@ -72,28 +72,56 @@
     opacity: 0.75;
 }
 
-.facet-items {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
+.facet .ts-wrapper {
+    margin-top: 0.35rem;
 }
 
-.facet-item {
+.facet .ts-option {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 0.5rem;
-    cursor: pointer;
-    font-size: var(--bs-font-size-sm);
-    user-select: none;
 }
 
-.facet-item input[type="checkbox"] {
-    accent-color: var(--bs-primary);
-}
-
-.facet-item small {
-    margin-left: auto;
+.ts-option-count {
     opacity: 0.75;
+    white-space: nowrap;
+}
+
+.autosuggest {
+    position: absolute;
+    top: calc(100% + 0.25rem);
+    left: 0;
+    right: 0;
+    z-index: 1070;
+    max-height: 16rem;
+    overflow-y: auto;
+    border: 1px solid var(--bs-border-color);
+    border-radius: var(--bs-border-radius);
+    background: var(--bs-body-bg);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.autosuggest-item {
+    display: block;
+    width: 100%;
+    padding: 0.4rem 0.6rem;
+    border: 0;
+    background: none;
+    text-align: start;
+    color: var(--bs-body-color);
+    font-size: var(--bs-font-size-sm);
+    cursor: pointer;
+}
+
+.autosuggest-item:hover,
+.autosuggest-item.is-active {
+    background: var(--bs-secondary-bg);
+}
+
+
+#search-icon {
+    background: transparent;
 }
 
 .card-carousel {
@@ -184,4 +212,29 @@
 .card-img-top,
 .card-carousel img {
     object-fit: cover;
+}
+
+#search-more {
+    padding: 0.75rem 0;
+    text-align: center;
+    color: var(--bs-secondary-color);
+    font-size: var(--bs-font-size-sm);
+}
+
+#search-more .end-of-list {
+    margin: 0;
+    opacity: 0.75;
+}
+
+a.badge-ideasets {
+    background: var(--bs-primary) !important;
+}
+
+a.badge-standards {
+    background: var(--bs-code-color) !important;
+}
+
+a.badge-concepts,
+a.badge-subjects {
+    background: var(--bs-primary-text-emphasis) !important;
 }

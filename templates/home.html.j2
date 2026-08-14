@@ -6,15 +6,42 @@
     <title>{{ site.title }}</title>
     <meta name="description" content="{{ site.description }}">
     <link rel="canonical" href="{{ site.base_url }}/">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css">
     <link rel="stylesheet" href="{{ site.theme_stylesheet }}">
+    <link rel="stylesheet" href="{{ site.base_url }}/assets/tom-select.bootstrap5.min.css">
     <link rel="stylesheet" href="{{ site.base_url }}/assets/style.css">
 </head>
 <body>
-<nav class="navbar navbar-expand navbar-dark bg-primary">
-    <div class="container">
-        <a class="navbar-brand" href="{{ site.base_url }}/">{{ site.title }}</a>
-    </div>
-</nav>
+<nav class="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ site.base_url }}/">{{ site.title }}</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSections" aria-controls="navbarSections" aria-expanded="true" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="navbar-collapse collapse" id="navbarSections" style="">
+                <ul class="navbar-nav me-auto">
+                    {% for key, title, path_name in menu_groups %}
+                    <li class="nav-item" >
+                        <a class="nav-link" href="{{ site.base_url }}/{{ path_name }}/">{{ title }}</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <div class="search ms-auto">
+                    <div class="input-group">
+                        <span class="input-group-text" id="search-icon">
+                            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                        </span>
+                         <input id="search-input" type="search" class="form-control phonetic-input" placeholder="शोधा..." autocomplete="off" aria-label="शोधा">
+                    </div>
+                    <div id="autosuggest" class="autosuggest" hidden></div>
+                </div>
+                <button id="facets-toggle" type="button" class="btn btn-outline-light ms-2 d-none d-md-block" data-bs-toggle="offcanvas" 
+                        data-bs-target="#facets-drawer" aria-controls="facets-drawer">
+                    <i class="fa-solid fas fa-filter" aria-hidden="true"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
 
 <main class="container py-4">
     <div class="row justify-content-center">
@@ -22,34 +49,38 @@
             <h1 class="h2">{{ site.title }}</h1>
             <p class="lead">{{ site.description }}</p>
 
-            <div class="search mb-4">
-                <input id="search-input" type="search" class="form-control form-control-lg phonetic-input" placeholder="शोधा...">
-            </div>
-
-            <div class="row g-4" id="search-page" data-base-url="{{ site.base_url }}">
-                <aside class="facets col-12 col-lg-3">
-                    <div class="facet-actions">
-                        <button id="clear-facets" type="button" class="btn btn-outline-secondary btn-sm">↻</button>
-                    </div>
-                    {% for type, label in facet_groups %}
-                    <div class="facet" data-facet="{{ type }}">
-                        <h3>{{ label }}</h3>
-                        <div class="facet-items"></div>
-                    </div>
-                    {% endfor %}
-                </aside>
-                <section class="search-results col-12 col-lg-9">
-                    <p id="result-count" class="result-count"></p>
-                    <div id="search-results" class="catalogue-grid"></div>
-                </section>
+            <div id="search-page" data-base-url="{{ site.base_url }}">
+                <p id="result-count" class="result-count"></p>
+                <div id="search-results" class="catalogue-grid"></div>
+                <div id="search-more" aria-live="polite"></div>
             </div>
         </div>
     </div>
 </main>
 
+<div id="facets-drawer" class="offcanvas offcanvas-end" tabindex="-1" aria-labelledby="facets-drawer-label">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="facets-drawer-label">फिल्टर</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="बंद"></button>
+    </div>
+    <div class="offcanvas-body">
+        <div class="facet-actions mb-3">
+            <button id="clear-facets" type="button" class="btn btn-sm"><i class="fa-solid fa-rotate"></i></button>
+        </div>
+        <div class="facets">
+            {% for type, label in facet_groups %}
+            <div class="facet" data-facet="{{ type }}" data-label="{{ label }}">
+                <select class="form-select facet-select" multiple aria-label="{{ label }}"></select>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
 <script src="{{ site.bootstrap_script }}"></script>
 <script src="{{ site.base_url }}/assets/minisearch.min.js"></script>
+<script src="{{ site.base_url }}/assets/tom-select.min.js"></script>
 <script src="{{ site.base_url }}/assets/app.js"></script>
-<script differ src="https://www.gamabhana.com/gamabhanaWidget/?mode=custom&l=0&k=1&n=&c=phonetic-input" ></script>
+<!--script differ src="https://www.gamabhana.com/gamabhanaWidget/?mode=custom&l=0&k=1&n=&c=phonetic-input" ></script-->
 </body>
 </html>
