@@ -219,6 +219,10 @@ async function initPage() {
                 placeholder: label,
                 closeAfterSelect: false,
                 hideSelected: false,
+                onInitialize: function() {
+                    // Blocks typing and mobile keyboards while leaving placeholders/labels active
+                    this.control_input.readOnly = true;
+                },
                 render: {
                     option: (data, escape) => `
                         <div class="ts-option">
@@ -333,12 +337,21 @@ async function initPage() {
         loadedPage = 0;
         loadingMore = false;
         render();
+        if (sentinel && typeof IntersectionObserver !== "undefined") {
+            observer = new IntersectionObserver((entries) => {
+                if (entries.some((entry) => entry.isIntersecting)) {
+                    loadNextPage();
+                }
+            }, { rootMargin: "200px 0px" });
+            observer.observe(sentinel);
+        }
     };
 
     let observer = null;
     const observerUnobserve = () => {
         if (observer && sentinel) observer.unobserve(sentinel);
     };
+
     if (sentinel && typeof IntersectionObserver !== "undefined") {
         observer = new IntersectionObserver((entries) => {
             if (entries.some((entry) => entry.isIntersecting)) {
@@ -613,7 +626,8 @@ function init() {
     initCatalogueSearch();
 
     // The home page (the search page) needs meta.json for the MiniSearch index.
-    if (document.getElementById("search-page")) {
+    if (document.getElementById("search-page")) 
+    {
         initPage().catch(error => {
             console.error("Home page index could not be loaded:", error);
         });

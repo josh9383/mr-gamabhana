@@ -478,6 +478,7 @@ def main():
             description="युक्त्या",
             canonical_url=f"{site['base_url']}/ideas/",
             items=idea_items,
+            facet_groups=facet_groups,
         ),
         encoding="utf-8"
     )
@@ -530,6 +531,7 @@ def main():
                 description=description,
                 canonical_url=f"{site['base_url']}/{path_name}/",
                 items=items,
+                facet_groups=facet_groups,
             ),
             encoding="utf-8"
         )
@@ -548,6 +550,7 @@ def main():
                     description=f"{description}: {item['title']}",
                     canonical_url=f"{site['base_url']}/{path_name}/{make_slug(item['title'])}/",
                     items=[idea_card(c, catalogue_defs, footer_types) for c in matching],
+                    facet_groups=facet_groups
                 ),
                 encoding="utf-8"
             )
