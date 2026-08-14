@@ -226,6 +226,15 @@
     opacity: 0.75;
 }
 
+
+a.badge-categories {
+    background: var(--bs-warning) !important;
+}
+
+a.badge-props {
+    background: var(--bs-info) !important;
+}
+
 a.badge-ideasets {
     background: var(--bs-primary) !important;
 }

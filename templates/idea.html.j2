@@ -45,21 +45,21 @@
         <div class="d-flex flex-wrap gap-2 mb-4">
             {% if "categories" in catalogue_attributes %}
             {% for category in categories %}
-            <a class="badge text-bg-info text-decoration-none" href="{{ site.base_url }}/categories/{{ category_slugs[loop.index0] }}/">{{ category }}</a>
+            <a class="badge badge-categories text-decoration-none" href="{{ site.base_url }}/categories/{{ category_slugs[loop.index0] }}/">{{ category }}</a>
             {% endfor %}
             {% endif %}
             {% if "concepts" in catalogue_attributes %}
             {% for concept in concepts %}
-            <a class="badge text-bg-warning text-decoration-none" href="{{ site.base_url }}/concepts/{{ concept_slugs[loop.index0] }}/">{{ concept }}</a>
+            <a class="badge badge-concepts text-decoration-none" href="{{ site.base_url }}/concepts/{{ concept_slugs[loop.index0] }}/">{{ concept }}</a>
             {% endfor %}
             {% endif %}
             {% if "props" in catalogue_attributes %}
             {% for prop in props %}
-            <a class="badge text-bg-dark text-decoration-none" href="{{ site.base_url }}/props/{{ prop_slugs[loop.index0] }}/">{{ prop }}</a>
+            <a class="badge  badge-props text-decoration-none" href="{{ site.base_url }}/props/{{ prop_slugs[loop.index0] }}/">{{ prop }}</a>
             {% endfor %}
             {% endif %}
             {% for ideaset in ideasets %}
-            <a class="badge text-bg-primary text-decoration-none" href="{{ site.base_url }}/ideasets/{{ ideaset_slugs[loop.index0] }}/">{{ ideaset }}</a>
+            <a class="badge badge-ideasets text-decoration-none" href="{{ site.base_url }}/ideasets/{{ ideaset_slugs[loop.index0] }}/">{{ ideaset }}</a>
             {% endfor %}
         </div>
 

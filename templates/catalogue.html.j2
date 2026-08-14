@@ -74,7 +74,7 @@
             {% elif item.footer_badges %}
             <div class="card-footer d-flex flex-wrap gap-1">
                 {% for badge in item.footer_badges %}
-                <a class="badge text-bg-light text-decoration-none" href="{{ site.base_url }}{{ badge.url }}">{{ badge.value }}</a>
+                <a class="badge badge-{{ badge.url.split('/')[1] }} text-decoration-none" href="{{ site.base_url }}{{ badge.url }}">{{ badge.value }}</a>
                 {% endfor %}
             </div>
             {% endif %}
