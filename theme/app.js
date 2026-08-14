@@ -130,25 +130,25 @@ async function initSearchPage() {
     const clearButton = document.getElementById("clear-facets");
 
     const data = await loadIndex();
-    const ideasets = data.ideasets;
+    const ideas = data.ideas;
     const catalogueAttributes = (data.site && data.site.catalogue_attributes) || [];
-    const facetTypes = [...catalogueAttributes, "standard", "subject"];
+    const facetTypes = (data.site && data.site.facet_types) || [...catalogueAttributes, "standard", "subject"];
 
     const state = { q: "" };
     facetTypes.forEach((type) => { state[type] = []; });
     let miniSearch = null;
 
-    const facetValues = (set, type) => {
-        if (type === "standard") return (set.standards || []).map(String);
-        if (type === "subject") return (set.subjects || []).map(String);
-        return (set[type] || []).map(String);
+    const facetValues = (idea, type) => {
+        if (type === "standard") return [String(idea.standard)];
+        if (type === "subject") return [idea.subject];
+        return (idea[type] || []).map(String);
     };
 
-    const matchesFacets = (set) =>
+    const matchesFacets = (idea) =>
         facetTypes.every((type) => {
             const selected = state[type];
             if (!selected.length) return true;
-            return selected.some((value) => facetValues(set, type).includes(value));
+            return selected.some((value) => facetValues(idea, type).includes(value));
         });
 
     const searchIds = (query) => {
@@ -158,18 +158,18 @@ async function initSearchPage() {
 
     const currentResults = () => {
         const ids = searchIds(state.q);
-        return ideasets.filter((set) => (ids === null || ids.has(set.id)) && matchesFacets(set));
+        return ideas.filter((idea) => (ids === null || ids.has(idea.id)) && matchesFacets(idea));
     };
 
     const filteredByOthers = (type) => {
         const ids = searchIds(state.q);
-        return ideasets.filter((set) => {
-            if (ids !== null && !ids.has(set.id)) return false;
+        return ideas.filter((idea) => {
+            if (ids !== null && !ids.has(idea.id)) return false;
             return facetTypes.every((other) => {
                 if (other === type) return true;
                 const selected = state[other];
                 if (!selected.length) return true;
-                return selected.some((value) => facetValues(set, other).includes(value));
+                return selected.some((value) => facetValues(idea, other).includes(value));
             });
         });
     };
@@ -178,13 +178,13 @@ async function initSearchPage() {
         facetsRoot.querySelectorAll(".facet").forEach((group) => {
             const type = group.dataset.facet;
             const counts = {};
-            filteredByOthers(type).forEach((set) => {
-                facetValues(set, type).forEach((value) => {
+            filteredByOthers(type).forEach((idea) => {
+                facetValues(idea, type).forEach((value) => {
                     counts[value] = (counts[value] || 0) + 1;
                 });
             });
 
-            const values = [...new Set(ideasets.flatMap((set) => facetValues(set, type)))]
+            const values = [...new Set(ideas.flatMap((idea) => facetValues(idea, type)))]
                 .sort((a, b) => a.localeCompare(b, "mr"));
 
             group.querySelector(".facet-items").innerHTML = values.map((value) => `
@@ -198,59 +198,47 @@ async function initSearchPage() {
         });
     };
 
-    const shuffle = (array) => {
-        const copy = array.slice();
-        for (let i = copy.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [copy[i], copy[j]] = [copy[j], copy[i]];
-        }
-        return copy;
-    };
-
-    const imageCapHtml = (set) => {
-        const urls = shuffle(set.representative_image_urls || []);
+    const imageCapHtml = (idea) => {
+        const urls = idea.image_urls || [];
         if (urls.length === 0) {
-            return `<img class="card-img-top" src="${escapeHtml(baseUrl)}/assets/card-fallback.png" alt="${escapeHtml(set.title)}">`;
+            return `<img class="card-img-top" src="${escapeHtml(baseUrl)}/assets/card-fallback.png" alt="${escapeHtml(idea.title)}">`;
         }
         if (urls.length === 1) {
-            return `<img class="card-img-top" src="${escapeHtml(baseUrl + urls[0])}" alt="${escapeHtml(set.title)}">`;
+            return `<img class="card-img-top" src="${escapeHtml(baseUrl + urls[0])}" alt="${escapeHtml(idea.title)}">`;
         }
         const count = Math.min(urls.length, 6);
         const imgElements = urls.slice(0, 6).map((url) =>
-            `<img src="${escapeHtml(baseUrl + url)}" alt="${escapeHtml(set.title)}" loading="lazy">`
+            `<img src="${escapeHtml(baseUrl + url)}" alt="${escapeHtml(idea.title)}" loading="lazy">`
         ).join("");
         return `<div class="card-carousel card-carousel--${count}">${imgElements}</div>`;
     };
 
     const renderResults = () => {
         const results = currentResults();
-        resultCount.textContent = `${results.length} संच`;
+        resultCount.textContent = `${results.length} युक्त्या`;
 
         if (!results.length) {
-            resultsContainer.innerHTML = '<p class="no-results">कोणतेही संच सापडले नाहीत</p>';
+            resultsContainer.innerHTML = '<p class="no-results">कोणतीही युक्ती सापडली नाही</p>';
             return;
         }
 
-        resultsContainer.innerHTML = results.map((set) => {
+        resultsContainer.innerHTML = results.map((idea) => {
             const propsHtml = facetTypes.includes("props")
-                ? (set.props || []).map((prop, index) => {
-                    const slug = (set.prop_slugs || [])[index];
+                ? (idea.props || []).map((prop, index) => {
+                    const slug = (idea.prop_slugs || [])[index];
                     return `<a class="badge text-bg-info text-decoration-none" href="${escapeHtml(baseUrl + "/props/" + slug + "/")}">${escapeHtml(prop)}</a>`;
                 }).join("")
                 : "";
-            const searchText = escapeHtml(`${set.title} ${set.description || ""}`.trim());
+            const searchText = escapeHtml(`${idea.title} ${idea.description || ""}`.trim());
 
             return `
             <div class="card catalogue-card" data-search="${searchText}">
-                ${imageCapHtml(set)}
+                ${imageCapHtml(idea)}
                 <div class="card-body">
-                    <h2 class="card-title h5"><a class="text-decoration-none" href="${escapeHtml(baseUrl + set.url)}" >${escapeHtml(set.title)}</a></h2>
-                    ${set.description ? `<p class="card-text">${escapeHtml(set.description)}</p>` : ""}
+                    <h2 class="card-title h5"><a class="text-decoration-none" href="${escapeHtml(baseUrl + idea.url)}" >${escapeHtml(idea.title)}</a></h2>
+                    ${idea.description ? `<p class="card-text">${escapeHtml(idea.description)}</p>` : ""}
                 </div>
-                <div class="card-footer d-flex flex-wrap gap-1 align-items-center">
-                    ${propsHtml}
-                    <small class="ideaset-count text-body-secondary">${set.member_count} युक्त्या</small>
-                </div>
+                ${propsHtml ? `<div class="card-footer d-flex flex-wrap gap-1">${propsHtml}</div>` : ""}
             </div>
             `;
         }).join("");
@@ -309,9 +297,9 @@ async function initSearchPage() {
     });
 
     miniSearch = new MiniSearch({
-        fields: ["title", "description", "categories", "concepts", "props", "standards", "subjects"],
+        fields: ["title", "description", "board", "standard", "subject", "categories", "concepts", "props", "ideasets"],
         boost: { title: 2 },
-        storeFields: ["id", "title", "description", "url", "member_count", "props", "prop_slugs", "representative_image_urls"],
+        storeFields: ["id", "title", "description", "url", "props", "prop_slugs", "image_urls"],
         tokenize: searchTokenize,
         processTerm: (term) => term.toLowerCase(),
         searchOptions: {
@@ -321,7 +309,7 @@ async function initSearchPage() {
             combineWith: "AND",
         },
     });
-    miniSearch.addAll(ideasets);
+    miniSearch.addAll(ideas);
 
     readStateFromURL();
     applyState();

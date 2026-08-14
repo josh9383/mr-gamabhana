@@ -4,19 +4,23 @@
 TBD - created by archiving change establish-project-baseline. Update Purpose after archive.
 ## Requirements
 ### Requirement: [REQ-SO-001: Home page]
-The build SHALL generate `site/index.html` from `templates/home.html.j2`, rendering the site title, description, a search input, one facet panel container per `catalogue_attributes` entry plus `standard` and `subject`, and a results container for the client-side search experience. Its canonical URL SHALL be the site root. The search experience SHALL operate over idea sets, not individual ideas.
+The build SHALL generate `site/index.html` from `templates/home.html.j2`, rendering the site title, description, a search input, one facet panel container per `catalogue_attributes` entry excluding `ideasets` plus `standard` and `subject`, and a results container for the client-side search experience. Its canonical URL SHALL be the site root. The search experience SHALL operate over ideas, not idea sets.
 
 #### Scenario: Home page is generated
 - **WHEN** the build completes
 - **THEN** `site/index.html` exists, contains the site title and description, and declares a canonical URL pointing at the site root
 
-#### Scenario: Home page provides the idea set search experience
+#### Scenario: Home page provides the idea search experience
 - **WHEN** the home page is generated with `catalogue_attributes` `["categories", "concepts", "props"]`
 - **THEN** it contains a search input, facet panels for categories, concepts, props, standard, and subject, and a results container
 - **AND** it references the site's own `assets/minisearch.min.js` and `assets/app.js`
 
+#### Scenario: No ideaset facet panel
+- **WHEN** `catalogue_attributes` includes `ideasets`
+- **THEN** the home page renders no facet panel for `ideasets`
+
 ### Requirement: [REQ-SO-003: Catalogue landing and individual pages]
-The build SHALL generate a landing page at `site/{path}/index.html` and one individual page at `site/{path}/{slug}/index.html` only for the catalogue types listed in `catalogue_attributes`. Individual pages SHALL list the ideas belonging to that item and support client-side MiniSearch filtering. Every listed item SHALL be rendered as a standard Bootstrap card with the `card` and `catalogue-card` classes, containing an image cap, a `card-title`, a `card-text` description, and a `card-footer`. Landing-page cards SHALL show the item count in the footer; individual-page idea cards SHALL list the idea's props in the footer as links to the prop catalogue pages only when the `props` catalogue is active.
+The build SHALL generate a landing page at `site/{path}/index.html` and one individual page at `site/{path}/{slug}/index.html` only for the catalogue types listed in `catalogue_attributes`, except the `ideasets` catalogue which SHALL generate only its landing page. Individual pages SHALL list the ideas belonging to that item and support client-side MiniSearch filtering. Every listed item SHALL be rendered as a standard Bootstrap card with the `card` and `catalogue-card` classes, containing an image cap, a `card-title`, a `card-text` description, and a `card-footer`. Landing-page cards SHALL show the item count in the footer; individual-page idea cards SHALL list the idea's props in the footer as links to the prop catalogue pages only when the `props` catalogue is active.
 
 #### Scenario: Catalogue pages are generated only for configured types
 - **WHEN** `catalogue_attributes` is `["categories", "concepts", "props"]` and the build completes
@@ -27,21 +31,30 @@ The build SHALL generate a landing page at `site/{path}/index.html` and one indi
 - **WHEN** the `props` catalogue is not active
 - **THEN** idea card footers do not link to prop catalogue pages
 
+#### Scenario: Ideasets catalogue landing page
+- **WHEN** `catalogue_attributes` includes `ideasets` and the build completes
+- **THEN** `site/ideasets/index.html` exists, listing every idea set as a card linking to `/ideasets/{slug}/` with the member count in the footer
+- **AND** no per-item catalogue page is generated under any `site/ideasets/{slug}/` path
+
 ### Requirement: [REQ-SO-005: Client-side index payload]
-The build SHALL generate `site/ideas.json` containing the `site` object, the `ideasets` index (id, title, description, url, `member_count`, aggregated catalogue values with slugs, `standards`, `subjects`, and `representative_image_urls`), and the `catalogues` for the active catalogue types. The individual `ideas` array SHALL be removed from the payload. The payload SHALL be encoded as UTF-8 JSON with indentation.
+The build SHALL generate `site/ideas.json` containing the `site` object, an `ideas` array (one record per idea carrying `id`, `title`, `description`, `url`, `board`, `standard`, `subject`, catalogue arrays with their slugs, `ideasets` with `ideaset_slugs`, and `image_urls`), and the `catalogues` for the active catalogue types. The `ideasets` index SHALL be removed from the payload. The payload SHALL be encoded as UTF-8 JSON with indentation.
 
 #### Scenario: ideas.json matches generated pages
 - **WHEN** the build completes
-- **THEN** `site/ideas.json` exists, its `ideasets` entries reference URLs that match generated idea set pages, and its `catalogues` match the generated catalogue pages
-- **AND** the payload contains no per-idea search index
+- **THEN** `site/ideas.json` exists, its `ideas` entries reference URLs that match generated idea pages, and its `catalogues` match the generated catalogue pages
+- **AND** the payload contains no idea set index
 
 ### Requirement: [REQ-SO-006: Sitemap]
-The build SHALL generate `site/sitemap.xml` listing the home URL, the ideas landing URL, every idea page URL, every idea set page URL, every active catalogue landing URL, and every individual catalogue page URL, each prefixed with the site's `base_url`.
+The build SHALL generate `site/sitemap.xml` listing the home URL, the ideas landing URL, every idea page URL, every idea set page URL, every active catalogue landing URL, and every individual catalogue page URL, each prefixed with the site's `base_url`. Ideaset page URLs SHALL be emitted from the idea set records exactly once; the catalogue loop SHALL NOT re-emit them for the `ideasets` catalogue.
 
 #### Scenario: Sitemap covers generated pages
 - **WHEN** the build completes
 - **THEN** `site/sitemap.xml` contains a `<loc>` entry for every idea set page and every generated catalogue and idea page
 - **AND** it contains no URLs for catalogue types that are not active
+
+#### Scenario: Sitemap contains no duplicate ideaset URLs
+- **WHEN** `catalogue_attributes` includes `ideasets` and the build completes
+- **THEN** each idea set page URL appears exactly once in `site/sitemap.xml`
 
 ### Requirement: [REQ-SO-007: Static assets copied to site]
 The build SHALL copy `theme/style.css`, `theme/app.js`, `theme/assets/minisearch.min.js`, and `theme/assets/card-fallback.png` into `site/assets/` so all pages reference assets from the generated site.
@@ -130,11 +143,4 @@ The build SHALL generate `site/ideasets/{slug}/index.html` for every idea set fr
 - **WHEN** an idea set page is generated
 - **THEN** it contains no `.catalogue-search` input, no MiniSearch script, and no gamabhana widget launcher
 
-### Requirement: [REQ-SO-014: Idea set card imagery on home page]
-Home-page idea set cards SHALL render an image cap built from `representative_image_urls` shuffled at render time into the existing CSS crossfade carousel (capped at six images), or the bundled `/assets/card-fallback.png` when there are no representative images.
-
-#### Scenario: Home cards show representative carousels
-- **WHEN** an idea set has representative images
-- **THEN** its home card renders a `card-carousel` of those images in random order
-- **AND** when it has none, its home card renders the fallback image
 

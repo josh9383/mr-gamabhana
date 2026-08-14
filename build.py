@@ -26,6 +26,7 @@ CATALOGUE_DEFS = {
     "categories": ("categories", "विभाग", "विभागांनुसार युक्त्या", "categories", "multi"),
     "concepts": ("concepts", "संकल्पना", "संकल्पनांनुसार युक्त्या", "concepts", "multi"),
     "props": ("props", "साहित्य", "साहित्यानुसार युक्त्या", "props", "multi"),
+    "ideasets" : ("ideasets", "युक्तीसंच", "युक्तीसंचानुसार युक्त्या", "ideasets", "multi"),
 }
 
 FACET_EXTRA_TYPES = [("standard", "इयत्ता"), ("subject", "विषय")]
@@ -189,6 +190,30 @@ def idea_card(idea):
     }
 
 
+def home_idea_items(ideas):
+    return [
+        {
+            "id": idea["id"],
+            "title": idea["title"],
+            "description": idea["description"],
+            "url": f"/ideas/{idea['id']}/",
+            "board": idea["board"],
+            "standard": str(idea["standard"]),
+            "subject": idea["subject"],
+            "categories": idea["categories"],
+            "category_slugs": idea["category_slugs"],
+            "concepts": idea["concepts"],
+            "concept_slugs": idea["concept_slugs"],
+            "props": idea["props"],
+            "prop_slugs": idea["prop_slugs"],
+            "ideasets": idea["ideasets"],
+            "ideaset_slugs": idea["ideaset_slugs"],
+            "image_urls": idea["image_urls"],
+        }
+        for idea in ideas
+    ]
+
+
 def catalogue_items(ideas, path_name, field, mode):
     counts = {}
     for idea in ideas:
@@ -205,6 +230,22 @@ def catalogue_items(ideas, path_name, field, mode):
             "search": value,
         }
         for value, count in sorted(counts.items())
+    ]
+
+
+def ideaset_catalogue_items(ideasets):
+    return [
+        {
+            "title": s["title"],
+            "url": s["url"],
+            "count": s["member_count"],
+            "description": s["description"],
+            "search": s["search"],
+            "image_urls": s["representative_image_urls"],
+            "props": [],
+            "prop_slugs": [],
+        }
+        for s in ideasets
     ]
 
 
@@ -249,14 +290,20 @@ def main():
 
     catalogues = {}
     for key in active_types:
-        path_name, _title, _description, field, mode = CATALOGUE_DEFS[key]
-        catalogues[key] = catalogue_items(ideas, path_name, field, mode)
+        if key == "ideasets":
+            catalogues[key] = ideaset_catalogue_items(ideasets)
+        else:
+            path_name, _title, _description, field, mode = CATALOGUE_DEFS[key]
+            catalogues[key] = catalogue_items(ideas, path_name, field, mode)
 
     # Home page (the idea set search experience).
+    facet_types = [key for key in active_types if key != "ideasets"] + ["standard", "subject"]
     facet_groups = [
         (key, CATALOGUE_DEFS[key][1])
         for key in active_types
+        if key != "ideasets"
     ] + FACET_EXTRA_TYPES
+    site["facet_types"] = facet_types
 
     (SITE / "index.html").write_text(
         home_template.render(site=theme_site, facet_groups=facet_groups),
@@ -340,7 +387,7 @@ def main():
         path_name, title, description, field, mode = CATALOGUE_DEFS[key]
         items = catalogues[key]
         landing_dir = SITE / path_name
-        landing_dir.mkdir(parents=True)
+        landing_dir.mkdir(parents=True, exist_ok=True)
 
         (landing_dir / "index.html").write_text(
             catalogue_template.render(
@@ -352,6 +399,9 @@ def main():
             ),
             encoding="utf-8"
         )
+
+        if key == "ideasets":
+            continue
 
         for item in items:
             matching = matching_ideas(ideas, field, mode, item["title"])
@@ -371,7 +421,7 @@ def main():
     # Client-side index.
     index_payload = {
         "site": site,
-        "ideasets": ideasets,
+        "ideas": home_idea_items(ideas),
         "catalogues": catalogues,
     }
 
@@ -391,6 +441,8 @@ def main():
     for key in active_types:
         path_name = CATALOGUE_DEFS[key][0]
         urls.append(f"{site['base_url']}/{path_name}/")
+        if key == "ideasets":
+            continue
         urls.extend(
             f"{site['base_url']}{item['url']}"
             for item in catalogues[key]
