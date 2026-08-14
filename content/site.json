@@ -64,7 +64,7 @@
         "description": "युक्तीसंचानुसार युक्त्या",
         "field": "ideasets",
         "mode": "multi",
-        "facet": false,
+        "facet": true,
         "menu" : true,
         "footer": true
       }
