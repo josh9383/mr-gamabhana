@@ -8,6 +8,7 @@
     "base_url_local": "http://localhost:8000",
     "bootstrap_script": "https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js",
     "theme_stylesheet": "https://cdn.jsdelivr.net/npm/bootswatch@5.3.8/dist/journal/bootstrap.min.css",
+    "og_logo" : "gamabhana_logo.png",
     "logo" : "gamabhana_white.png",
     "favicon" : "gamabhana_favicon.png",
     "catalogues": {
