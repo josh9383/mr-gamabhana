@@ -76,6 +76,10 @@
     margin-top: 0.35rem;
 }
 
+.facet[data-locked="true"] .form-control {
+    margin-top: 0.35rem;
+}
+
 .facet .ts-option {
     display: flex;
     align-items: center;
@@ -224,6 +228,94 @@
 #search-more .end-of-list {
     margin: 0;
     opacity: 0.75;
+}
+
+#onboarding-hero .hero-steps {
+    display: block;
+}
+
+#onboarding-hero.hero-js .hero-steps {
+    display: grid;
+    grid-template-columns: 1fr;
+}
+
+#onboarding-hero.hero-js .hero-step {
+    grid-area: 1 / 1;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(6px);
+    transition: opacity 0.35s ease, transform 0.35s ease, visibility 0.35s;
+}
+
+#onboarding-hero.hero-js .hero-step-active {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+}
+
+#onboarding-hero.hero-collapsing {
+    opacity: 0;
+    visibility: hidden;
+    max-height: 0;
+    overflow: hidden;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    transition: opacity 0.35s ease, max-height 0.35s ease, padding 0.35s ease, margin 0.35s ease, visibility 0.35s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #onboarding-hero.hero-js .hero-step,
+    #onboarding-hero.hero-collapsing {
+        transition: none;
+    }
+}
+
+#ideaset-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+#ideaset-cards .card {
+    width: 100%;
+}
+
+#ideaset-cards .card-body .card-img-top,
+#ideaset-cards .card-body .card-carousel {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+#ideaset-cards .idea-content {
+    margin-top: 1rem;
+}
+
+#ideaset-more {
+    padding: 0.75rem 0;
+    text-align: center;
+    color: var(--bs-secondary-color);
+    font-size: var(--bs-font-size-sm);
+}
+
+#ideaset-more .end-of-list {
+    margin: 0;
+    opacity: 0.75;
+}
+
+.idea-page-card {
+    width: 100%;
+}
+
+.idea-page-card .card-body .card-img-top,
+.idea-page-card .card-body .card-carousel {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+.idea-page-card .idea-content {
+    margin-top: 1rem;
 }
 
 

@@ -122,13 +122,13 @@ The build SHALL resolve idea set membership from each idea's `ideasets` array ag
 - **THEN** its record has `member_count` 2, `standards` `["4"]`, and `categories` equal to the ordered union of both members' categories
 - **AND** `representative_image_urls` holds the first image of each member in member order
 
-### Requirement: [REQ-BE-014: Idea set pages rendered as member accordions]
-The build SHALL render `site/ideasets/{slug}/index.html` from `templates/ideaset.html.j2` for every idea set, providing for each member idea an accordion item payload containing `title`, `url`, `description`, `image_urls`, and `content_html` (the idea's Markdown body converted to HTML with the `extra` and `toc` extensions).
+### Requirement: [REQ-BE-014: Idea set pages rendered as member cards]
+The build SHALL render `site/ideasets/{slug}/index.html` from `templates/ideaset.html.j2` for every idea set, providing for each member idea a card payload containing `title`, `url`, `description`, `image_urls`, `content_html` (the idea's Markdown body converted to HTML with the `extra` and `toc` extensions), and `footer_badges` (a list of `value`/`url` pairs computed with the same logic as idea-card footers from the active `catalogues` configuration). The payload SHALL NOT include accordion-specific fields.
 
-#### Scenario: Idea set page is generated with member accordion payloads
+#### Scenario: Idea set page is generated with member card payloads
 - **WHEN** the build completes
 - **THEN** `site/ideasets/fractions-introduction/index.html` exists
-- **AND** it contains one accordion item per member idea, each carrying the idea's title, url, description, images, and converted Markdown body
+- **AND** it contains one card per member idea, each carrying the idea's title, url, description, images, converted Markdown body, and footer badges
 
 ### Requirement: [REQ-BE-015: Home facet type list]
 The build SHALL derive the home-page facet type list from the `catalogues` configuration: every catalogue type whose definition has `facet: true` SHALL be a home facet, and the build SHALL expose this exact list to the client-side search so rendered facet panels, URL state, and filtering stay consistent. `ideasets` SHALL be excluded by setting `facet: false` in its definition because an idea set cannot be a facet value of itself.
@@ -174,4 +174,47 @@ The build SHALL derive two lists from the `catalogues` configuration: the navbar
 #### Scenario: Omitted flags default to true
 - **WHEN** the `catalogues` configuration omits the `menu` and `footer` flags on an entry
 - **THEN** the entry is included in both the navbar menu list and the footer type list
+
+### Requirement: [REQ-BE-019: Locked facet context on individual catalogue pages]
+The build SHALL pass a `locked_facet` context to the catalogue template when rendering each individual catalogue page, derived from the page's item title and the catalogue definition: `type` (the catalogue key), `label` (the catalogue definition's `title`), and `values` (a single-element list containing the item's title). The build SHALL NOT pass a locked facet when rendering catalogue landing pages or the ideas landing page. The template SHALL use the context to render the read-only locked-facet control and the search container's `data-locked-facet` and `data-locked-values` attributes.
+
+#### Scenario: Individual pages receive a locked facet
+- **WHEN** the build renders `/standards/4/index.html` for the standard catalogue
+- **THEN** `locked_facet.type` is `standard`, `locked_facet.label` is the standard definition's title, and `locked_facet.values` is `["4"]`
+
+#### Scenario: Landing pages receive no locked facet
+- **WHEN** the build renders `site/standards/index.html` or `site/ideas/index.html`
+- **THEN** the render context carries no `locked_facet`
+- **AND** the page keeps the card-grid landing layout
+
+### Requirement: [REQ-BE-020: Ideaset catalogue items carry facet fields and id]
+The build SHALL expose on every idea set catalogue item, in addition to `title`, `url`, `count`, `description`, `search`, and `image_urls`, the fields `id` (the idea set slug) and the aggregated facet fields `standards`, `subjects`, `categories`/`category_slugs`, `concepts`/`concept_slugs`, and `props`/`prop_slugs`, copied from the idea set records so the client can facet and index idea sets. The same enriched item list SHALL feed both the ideasets landing page render and `catalogues.ideasets` in `site/meta.json`.
+
+#### Scenario: Ideaset items carry facet fields
+- **WHEN** the build generates the ideasets landing page or `site/meta.json`
+- **THEN** each ideasets catalogue item has an `id` matching the idea set slug
+- **AND** its `standards`, `subjects`, `categories`, `concepts`, and `props` arrays equal the idea set record's aggregated values
+
+### Requirement: [REQ-BE-021: Ideasets landing page search context]
+The build SHALL render `site/ideasets/index.html` from the catalogue template with a `search_index` context of `"ideasets"` and a `facet_groups` list that excludes `ideasets`, and SHALL pass no `locked_facet`. Other catalogue landing pages and the ideas landing page SHALL continue to render without `search_index`, and individual catalogue pages SHALL continue to receive `locked_facet`.
+
+#### Scenario: Ideasets landing uses search context
+- **WHEN** the build renders `site/ideasets/index.html`
+- **THEN** the render context carries `search_index` equal to `"ideasets"` and a `facet_groups` list without `ideasets`
+- **AND** no `locked_facet` is passed
+
+#### Scenario: Other landing pages stay unchanged
+- **WHEN** the build renders `site/standards/index.html` or `site/ideas/index.html`
+- **THEN** the render context carries no `search_index`
+
+### Requirement: [REQ-BE-022: Idea page context carries footer badges]
+The build SHALL include `footer_badges` in the render context for every idea page (`site/ideas/{id}/index.html` from `templates/idea.html.j2`), computed with the same logic as idea-card footers — a list of `value`/`url` pairs from the active `catalogues` configuration for every type with `footer: true`. The context SHALL retain the idea record fields, `catalogue_attributes`, `content`, and `content_html`, and the Markdown copy render SHALL be unaffected.
+
+#### Scenario: Idea page is generated with footer badges
+- **WHEN** the build renders an idea page for an idea with active `footer: true` catalogue attributes
+- **THEN** the render context contains `footer_badges` with the idea's catalogue values and their catalogue page URLs
+
+#### Scenario: Markdown copy is unaffected
+- **WHEN** the build renders `index.md` for an idea
+- **THEN** it still contains the idea metadata as YAML front matter plus the body
 

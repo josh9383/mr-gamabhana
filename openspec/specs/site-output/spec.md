@@ -4,7 +4,7 @@
 TBD - created by archiving change establish-project-baseline. Update Purpose after archive.
 ## Requirements
 ### Requirement: [REQ-SO-001: Home page]
-The build SHALL generate `site/index.html` from `templates/home.html.j2`, rendering the site title, description, a navbar with a search icon and search input, a facet drawer button, one facet panel container per `catalogues` type whose definition has `facet: true`, **a nav link per `catalogues` type whose definition has `menu: true` (labeled with the type's `title`, linking to `/{path_name}/`)**, and an always-visible results container for the client-side idea listing. The idea listing SHALL render in the page body outside any panel or drawer. The facet drawer button SHALL be hidden on extra-small and small screens (mobile-first) and visible from the medium breakpoint upward. The search experience SHALL operate over ideas, not idea sets. The search and facet drawer icons SHALL be Font Awesome icons loaded from the Font Awesome CDN stylesheet, not inline SVG markup.
+The build SHALL generate `site/index.html` from `templates/home.html.j2`, rendering the site title, description, a navbar with a search icon and search input, a facet drawer button, one facet panel container per `catalogues` type whose definition has `facet: true`, **a nav link per `catalogues` type whose definition has `menu: true` (labeled with the type's `title`, linking to `/{path_name}/`)**, an onboarding hero section directly below the navbar (the `home-onboarding-hero` capability), and an always-visible results container for the client-side idea listing. The idea listing SHALL render in the page body outside any panel or drawer. The facet drawer button SHALL be hidden on extra-small and small screens (mobile-first) and visible from the medium breakpoint upward. The search experience SHALL operate over ideas, not idea sets. The search and facet drawer icons SHALL be Font Awesome icons loaded from the Font Awesome CDN stylesheet, not inline SVG markup.
 
 #### Scenario: Home page is generated
 - **WHEN** the build completes
@@ -34,8 +34,13 @@ The build SHALL generate `site/index.html` from `templates/home.html.j2`, render
 - **WHEN** the `catalogues` configuration sets `facet: false` for `ideasets`
 - **THEN** the home page renders no facet panel for `ideasets`
 
+#### Scenario: Home page renders the onboarding hero
+- **WHEN** the home page is generated
+- **THEN** it contains an onboarding hero section directly below the navbar
+- **AND** the hero contains three ordered steps covering searching, filtering, and opening an idea
+
 ### Requirement: [REQ-SO-003: Catalogue landing and individual pages]
-The build SHALL generate a landing page at `site/{path}/index.html` and one individual page at `site/{path}/{slug}/index.html` only for the catalogue types declared as keys of the `catalogues` configuration, except the `ideasets` catalogue which SHALL generate only its landing page. Individual pages SHALL list the ideas belonging to that item and support client-side MiniSearch filtering. Every listed item SHALL be rendered as a standard Bootstrap card with the `card` and `catalogue-card` classes, containing an image cap, a `card-title`, a `card-text` description, and a `card-footer`. Landing-page cards SHALL show the item count in the footer; individual-page idea cards SHALL list in the footer badges linking to the individual catalogue pages of every catalogue type whose definition has `footer: true` (or the dedicated idea set page at `/ideasets/{slug}/` for idea set values).
+The build SHALL generate a landing page at `site/{path}/index.html` and one individual page at `site/{path}/{slug}/index.html` only for the catalogue types declared as keys of the `catalogues` configuration, except the `ideasets` catalogue which SHALL generate only its landing page. Individual pages SHALL render the home-page search experience — a facet row of Tom Select panels plus a `#search-page` search block with a results container — with the page's own catalogue facet rendered as a static read-only control (the `locked-facet` capability), and SHALL pre-render the ideas belonging to that item inside the results container as cards so the listing works without JavaScript. Landing pages other than `ideasets` SHALL keep their card grid and support client-side MiniSearch filtering. The `ideasets` landing page SHALL render the faceted search experience over idea sets (the `ideaset-landing-search` capability) with no `ideasets` facet panel. Every listed item SHALL be rendered as a standard Bootstrap card with the `card` and `catalogue-card` classes, containing an image cap, a `card-title`, a `card-text` description, and a `card-footer`. Non-ideaset landing-page cards SHALL show the item count in the footer; individual-page idea cards SHALL list in the footer badges linking to the individual catalogue pages of every catalogue type whose definition has `footer: true` (or the dedicated idea set page at `/ideasets/{slug}/` for idea set values). Individual pages SHALL reference the Font Awesome stylesheet and the vendored `assets/tom-select.bootstrap5.min.css` in the head.
 
 #### Scenario: Catalogue pages are generated only for configured types
 - **WHEN** the `catalogues` configuration lists only `categories`, `concepts`, and `props` and the build completes
@@ -49,16 +54,26 @@ The build SHALL generate a landing page at `site/{path}/index.html` and one indi
 
 #### Scenario: Ideasets catalogue landing page
 - **WHEN** the `catalogues` configuration includes `ideasets` and the build completes
-- **THEN** `site/ideasets/index.html` exists, listing every idea set as a card linking to `/ideasets/{slug}/` with the member count in the footer
+- **THEN** `site/ideasets/index.html` exists, rendering a `#search-page` block with `data-index="ideasets"`, interactive facet panels for every active facet except `ideasets`, and every idea set as a card linking to `/ideasets/{slug}/` with the member count in the footer
 - **AND** no per-item catalogue page is generated under any `site/ideasets/{slug}/` path
 
+#### Scenario: Individual pages render facets with a locked control
+- **WHEN** the build generates `/standards/4/index.html`
+- **THEN** the page contains a facet row whose standard panel is a static read-only control showing `4`
+- **AND** the other facet panels are Tom Select multi-selects
+- **AND** the pre-rendered cards sit inside the `#search-results` container
+
 ### Requirement: [REQ-SO-005: Client-side index payload]
-The build SHALL generate `site/meta.json` containing the `site` object, an `ideas` array (one record per idea carrying `id`, `title`, `description`, `url`, `board`, `standard`, `subject`, catalogue arrays with their slugs, `ideasets` with `ideaset_slugs`, and `image_urls`), and the `catalogues` for the active catalogue types. The `ideasets` index SHALL be removed from the payload. The payload SHALL be encoded as UTF-8 JSON with indentation.
+The build SHALL generate `site/meta.json` containing the `site` object, an `ideas` array (one record per idea carrying `id`, `title`, `description`, `url`, `board`, `standard`, `subject`, catalogue arrays with their slugs, `ideasets` with `ideaset_slugs`, and `image_urls`), and the `catalogues` for the active catalogue types, including the `ideasets` items (one per idea set carrying its `id`, `title`, `url`, `count`, `description`, `search`, `image_urls`, and the aggregated facet fields). The payload SHALL be encoded as UTF-8 JSON with indentation.
 
 #### Scenario: meta.json matches generated pages
 - **WHEN** the build completes
 - **THEN** `site/meta.json` exists, its `ideas` entries reference URLs that match generated idea pages, and its `catalogues` match the generated catalogue pages
-- **AND** the payload contains no idea set index
+
+#### Scenario: Payload carries the ideasets index
+- **WHEN** the `catalogues` configuration includes `ideasets` and the build completes
+- **THEN** `catalogues.ideasets` in `site/meta.json` contains one item per idea set
+- **AND** each item carries `id` and the aggregated `standards`, `subjects`, `categories`, `concepts`, and `props` arrays
 
 ### Requirement: [REQ-SO-006: Sitemap]
 The build SHALL generate `site/sitemap.xml` listing the home URL, the ideas landing URL, every idea page URL, every idea set page URL, every active catalogue landing URL, and every individual catalogue page URL, each prefixed with the site's `base_url`. Ideaset page URLs SHALL be emitted from the idea set records exactly once; the catalogue loop SHALL NOT re-emit them for the `ideasets` catalogue.
@@ -109,13 +124,17 @@ Every generated artifact SHALL be entirely self-contained with no shared runtime
 - **AND** no copy of the widget is required under `site/assets/`
 
 ### Requirement: [REQ-SO-002: Idea pages with HTML and Markdown copies]
-The build SHALL generate, for every idea, a directory `site/ideas/{id}/` containing `index.html` and `index.md`. The HTML page SHALL render the idea metadata, badges linking only to catalogue pages that exist for the active `catalogues` configuration and to each idea set the idea belongs to, and the converted Markdown body. The Markdown copy SHALL reproduce the idea metadata as YAML front matter plus the body.
+The build SHALL generate, for every idea, a directory `site/ideas/{id}/` containing `index.html` and `index.md`. The HTML page SHALL render the idea as a single full-width card (the `idea-page-card` capability): a `card-body` with the title, description, photos, and the converted Markdown body, plus a `card-footer` of badge links computed from the active `catalogues` configuration (every type with `footer: true`), covering the catalogue pages that exist and each idea set the idea belongs to. The Markdown copy SHALL reproduce the idea metadata as YAML front matter plus the body.
 
 #### Scenario: Idea directory contains both copies
 - **WHEN** the build processes an idea with id `m1`
 - **THEN** `site/ideas/m1/index.html` and `site/ideas/m1/index.md` exist
-- **AND** the HTML page links to the categories, concepts, and props catalogue pages and to the idea set pages the idea belongs to
+- **AND** the HTML page contains a single `.idea-page-card` whose footer links to the idea's catalogue pages and idea set pages
 - **AND** it does not link to boards, standards, or subjects catalogue pages when they are not active
+
+#### Scenario: Idea page drops the header badge row and thumbnail grid
+- **WHEN** an idea page is generated
+- **THEN** it contains no separate header badge row and no `row-cols-3` thumbnail grid
 
 ### Requirement: [REQ-SO-004: Ideas catalogue landing page]
 The build SHALL keep generating `site/ideas/index.html` listing every idea as a filterable Bootstrap card with an image cap, a `card-title`, a `card-text` description, and a `card-footer` listing the idea's props as links to the prop catalogue pages only when the `props` catalogue is active.
@@ -140,10 +159,10 @@ The build SHALL inject the resolved theme stylesheet and Bootstrap script URLs i
 - **THEN** it loads the theme stylesheet followed by the site's own `assets/style.css`
 
 ### Requirement: [REQ-SO-012: Phonetic search input]
-The build SHALL render both search inputs — the home page's `#search-input` and the catalogue pages' `.catalogue-search` — with the shared class `phonetic-input`. Home and catalogue pages SHALL include the gamabhana widget launcher script (`https://www.gamabhana.com/gamabhanaWidget/add/?mode=custom&c=phonetic-input&lang=0`) as a parse-time script tag in the body, so the widget converts Roman keystrokes into Devanagari in those inputs.
+The build SHALL render all search inputs — the home page's `#search-input`, the catalogue landing pages' `.catalogue-search`, the individual catalogue pages' `#search-input`, and the ideasets landing page's `#search-input` — with the shared class `phonetic-input`. Home and catalogue pages SHALL include the gamabhana widget launcher script (`https://www.gamabhana.com/gamabhanaWidget/add/?mode=custom&c=phonetic-input&lang=0`) as a parse-time script tag in the body, so the widget converts Roman keystrokes into Devanagari in those inputs.
 
 #### Scenario: Widget launcher on search pages
-- **WHEN** the home page or any catalogue page is generated
+- **WHEN** the home page, any catalogue page, or the ideasets landing page is generated
 - **THEN** it contains the gamabhana widget launcher script URL
 - **AND** its search input carries the `phonetic-input` class
 
@@ -152,15 +171,15 @@ The build SHALL render both search inputs — the home page's `#search-input` an
 - **THEN** it does not include the gamabhana widget launcher script
 
 ### Requirement: [REQ-SO-013: Idea set pages]
-The build SHALL generate `site/ideasets/{slug}/index.html` for every idea set from `templates/ideaset.html.j2`, rendering the idea set title and its member ideas as a Bootstrap accordion with one item per member idea. Each accordion item header SHALL show the member idea's title, and its body SHALL contain the member idea's images and details (description and Markdown body converted to HTML). Idea set pages SHALL NOT render catalogue cards and SHALL NOT include the catalogue search experience.
+The build SHALL generate `site/ideasets/{slug}/index.html` for every idea set from `templates/ideaset.html.j2`, rendering the idea set title and its member ideas as full-content cards in a single-column list with progressive on-scroll reveal (the `ideaset-page-cards` capability). Each card SHALL show the member idea's title, photos, details (description and Markdown body converted to HTML), and catalogue-attribute footer badges. Idea set pages SHALL NOT include the catalogue search experience and SHALL NOT use the Bootstrap accordion structure.
 
-#### Scenario: Idea set pages render member accordions
+#### Scenario: Idea set pages render member cards
 - **WHEN** the build completes
 - **THEN** `site/ideasets/{slug}/index.html` exists for every idea set
-- **AND** it contains one accordion item per member idea, each with the idea's title in the header and the idea's images and details in the body
+- **AND** it contains one full-content card per member idea in a single-column list with a reveal sentinel
 
 #### Scenario: Idea set pages drop the card search
 - **WHEN** an idea set page is generated
-- **THEN** it contains no `.catalogue-search` input, no MiniSearch script, and no gamabhana widget launcher
+- **THEN** it contains no `.catalogue-search` input, no MiniSearch script, no gamabhana widget launcher, and no accordion markup
 
 

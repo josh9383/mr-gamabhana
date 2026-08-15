@@ -1,5 +1,5 @@
-async function loadIndex() {
-    const response = await fetch("meta.json");
+async function loadIndex(url) {
+    const response = await fetch(url || "meta.json");
     if (!response.ok) {
         throw new Error(`Could not load meta.json: ${response.status}`);
     }
@@ -15,6 +15,18 @@ function escapeHtml(value) {
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;");
+}
+
+function shuffleArray(array) {
+  // Loop from the last element down to the second element
+  for (let i = array.length - 1; i > 0; i--) {
+    // Pick a random index from 0 to i
+    const j = Math.floor(Math.random() * (i + 1));
+    
+    // Swap elements using array destructuring
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
 }
 
 const PHONETIC_CONSONANTS = [
@@ -130,12 +142,30 @@ async function initPage() {
     const sentinel = document.getElementById("search-more");
     const clearButton = document.getElementById("clear-facets");
 
-    const data = await loadIndex();
-    const ideas = data.ideas;
-    const facetTypes = (data.site && data.site.facet_types) || [];
+    const lockedFacet = page.dataset.lockedFacet || null;
+    let lockedValues = [];
+    if (lockedFacet) {
+        try {
+            lockedValues = JSON.parse(page.dataset.lockedValues || "[]");
+        } catch (e) {
+            lockedValues = [];
+        }
+    }
+
+    const indexMode = page.dataset.index || "ideas";
+    const data = await loadIndex(page.dataset.metaUrl);
+    const items = indexMode === "ideasets"
+        ? ((data.catalogues && data.catalogues.ideasets) || [])
+        : shuffleArray(data.ideas);
+    const facetTypes = facetsRoot
+        ? Array.from(facetsRoot.querySelectorAll(".facet")).map((group) => group.dataset.facet)
+        : ((data.site && data.site.facet_types) || []);
 
     const state = { q: "" };
     facetTypes.forEach((type) => { state[type] = []; });
+    if (lockedFacet && lockedValues.length) {
+        state[lockedFacet] = lockedValues;
+    }
     const tomSelects = {};
     let miniSearch = null;
 
@@ -143,17 +173,23 @@ async function initPage() {
     let loadedPage = 0;
     let loadingMore = false;
 
-    const facetValues = (idea, type) => {
-        if (type === "standard") return [String(idea.standard)];
-        if (type === "subject") return [idea.subject];
-        return (idea[type] || []).map(String);
+    const facetValues = (item, type) => {
+        if (indexMode === "ideasets") {
+            const key = type === "standard" ? "standards"
+                : type === "subject" ? "subjects"
+                : type;
+            return (item[key] || []).map(String);
+        }
+        if (type === "standard") return [String(item.standard)];
+        if (type === "subject") return [item.subject];
+        return (item[type] || []).map(String);
     };
 
-    const matchesFacets = (idea) =>
+    const matchesFacets = (item) =>
         facetTypes.every((type) => {
             const selected = state[type];
             if (!selected.length) return true;
-            return selected.some((value) => facetValues(idea, type).includes(value));
+            return selected.some((value) => facetValues(item, type).includes(value));
         });
 
     const searchIds = (query) => {
@@ -163,18 +199,18 @@ async function initPage() {
 
     const currentResults = () => {
         const ids = searchIds(state.q);
-        return ideas.filter((idea) => (ids === null || ids.has(idea.id)) && matchesFacets(idea));
+        return items.filter((item) => (ids === null || ids.has(item.id)) && matchesFacets(item));
     };
 
     const filteredByOthers = (type) => {
         const ids = searchIds(state.q);
-        return ideas.filter((idea) => {
-            if (ids !== null && !ids.has(idea.id)) return false;
+        return items.filter((item) => {
+            if (ids !== null && !ids.has(item.id)) return false;
             return facetTypes.every((other) => {
                 if (other === type) return true;
                 const selected = state[other];
                 if (!selected.length) return true;
-                return selected.some((value) => facetValues(idea, other).includes(value));
+                return selected.some((value) => facetValues(item, other).includes(value));
             });
         });
     };
@@ -186,13 +222,13 @@ async function initPage() {
             if (!ts) return;
 
             const counts = {};
-            filteredByOthers(type).forEach((idea) => {
-                facetValues(idea, type).forEach((value) => {
+            filteredByOthers(type).forEach((item) => {
+                facetValues(item, type).forEach((value) => {
                     counts[value] = (counts[value] || 0) + 1;
                 });
             });
 
-            const values = [...new Set(ideas.flatMap((idea) => facetValues(idea, type)))]
+            const values = [...new Set(items.flatMap((item) => facetValues(item, type)))]
                 .sort((a, b) => a.localeCompare(b, "mr"));
             const wanted = new Set(values);
 
@@ -209,6 +245,7 @@ async function initPage() {
     const initFacetSelects = () => {
         facetsRoot.querySelectorAll(".facet").forEach((group) => {
             const type = group.dataset.facet;
+            if (group.dataset.locked === "true") return;
             const select = group.querySelector(".facet-select");
             const label = group.dataset.label;
             const ts = new TomSelect(select, {
@@ -241,37 +278,40 @@ async function initPage() {
         });
     };
 
-    const imageCapHtml = (idea) => {
-        const urls = idea.image_urls || [];
+    const imageCapHtml = (item) => {
+        const urls = item.image_urls || [];
         if (urls.length === 0) {
-            return `<img class="card-img-top" src="${escapeHtml(baseUrl)}/assets/card-fallback.png" alt="${escapeHtml(idea.title)}">`;
+            return `<img class="card-img-top" src="${escapeHtml(baseUrl)}/assets/card-fallback.png" alt="${escapeHtml(item.title)}">`;
         }
         if (urls.length === 1) {
-            return `<img class="card-img-top" src="${escapeHtml(baseUrl + urls[0])}" alt="${escapeHtml(idea.title)}">`;
+            return `<img class="card-img-top" src="${escapeHtml(baseUrl + urls[0])}" alt="${escapeHtml(item.title)}">`;
         }
         const count = Math.min(urls.length, 6);
         const imgElements = urls.slice(0, 6).map((url) =>
-            `<img src="${escapeHtml(baseUrl + url)}" alt="${escapeHtml(idea.title)}" loading="lazy">`
+            `<img src="${escapeHtml(baseUrl + url)}" alt="${escapeHtml(item.title)}" loading="lazy">`
         ).join("");
         return `<div class="card-carousel card-carousel--${count}">${imgElements}</div>`;
     };
 
-    const cardHtml = (idea) => {
-        const footerBadgesHtml = (idea.footer_badges || []).map(badge => {
-            let badgeExtClass = `badge-${badge.url.split("/").filter(Boolean)[0]}`;
-            return `<a class="badge rounded-pill bg-info ${badgeExtClass} text-decoration-none" href="${escapeHtml(baseUrl + badge.url)}">${escapeHtml(badge.value)}</a>`
-        }
-        ).join("");
-        const searchText = escapeHtml(`${idea.title} ${idea.description || ""}`.trim());
+    const cardHtml = (item) => {
+        const footerHtml = item.count != null
+            ? `<div class="card-footer"><small>युक्त्या (${escapeHtml(String(item.count))})</small></div>`
+            : (item.footer_badges || []).length
+                ? `<div class="card-footer d-flex flex-wrap gap-1">${(item.footer_badges || []).map(badge => {
+                    let badgeExtClass = `badge-${badge.url.split("/").filter(Boolean)[0]}`;
+                    return `<a class="badge rounded-pill bg-info ${badgeExtClass} text-decoration-none" href="${escapeHtml(baseUrl + badge.url)}">${escapeHtml(badge.value)}</a>`
+                }).join("")}</div>`
+                : "";
+        const searchText = escapeHtml(`${item.title} ${item.description || ""}`.trim());
 
         return `
         <div class="card catalogue-card" data-search="${searchText}">
-            ${imageCapHtml(idea)}
+            ${imageCapHtml(item)}
             <div class="card-body">
-                <h2 class="card-title h5"><a class="text-decoration-none" href="${escapeHtml(baseUrl + idea.url)}" >${escapeHtml(idea.title)}</a></h2>
-                ${idea.description ? `<p class="card-text">${escapeHtml(idea.description)}</p>` : ""}
+                <h2 class="card-title h5"><a class="text-decoration-none" href="${escapeHtml(baseUrl + item.url)}" >${escapeHtml(item.title)}</a></h2>
+                ${item.description ? `<p class="card-text">${escapeHtml(item.description)}</p>` : ""}
             </div>
-            ${footerBadgesHtml ? `<div class="card-footer d-flex flex-wrap gap-1">${footerBadgesHtml}</div>` : ""}
+            ${footerHtml}
         </div>
         `;
     };
@@ -407,7 +447,10 @@ async function initPage() {
     const writeStateToURL = () => {
         const params = new URLSearchParams();
         if (state.q) params.set("q", state.q);
-        facetTypes.forEach((type) => state[type].forEach((value) => params.append(type, value)));
+        facetTypes.forEach((type) => {
+            if (type === lockedFacet) return;
+            state[type].forEach((value) => params.append(type, value));
+        });
         const query = params.toString();
         history.replaceState(null, "", query ? `${window.location.pathname}?${query}` : window.location.pathname);
     };
@@ -416,6 +459,9 @@ async function initPage() {
         const params = new URLSearchParams(window.location.search);
         state.q = params.get("q") || "";
         facetTypes.forEach((type) => { state[type] = params.getAll(type); });
+        if (lockedFacet && lockedValues.length) {
+            state[lockedFacet] = lockedValues;
+        }
     };
 
     const render = () => {
@@ -488,6 +534,7 @@ async function initPage() {
 
     clearButton.addEventListener("click", () => {
         facetTypes.forEach((type) => {
+            if (type === lockedFacet) return;
             state[type] = [];
             const ts = tomSelects[type];
             if (ts) ts.clear(true);
@@ -499,10 +546,16 @@ async function initPage() {
         hideAutosuggest();
     });
 
-    miniSearch = new MiniSearch({
+    const searchConfig = indexMode === "ideasets" ? {
+        fields: ["title", "description", "standards", "subjects", "categories", "concepts", "props"],
+        storeFields: ["id"],
+    } : {
         fields: ["title", "description", "board", "standard", "subject", "categories", "concepts", "props", "ideasets"],
-        boost: { title: 2 },
         storeFields: ["id", "title", "description", "url", "props", "prop_slugs", "image_urls", "footer_badges"],
+    };
+    miniSearch = new MiniSearch({
+        ...searchConfig,
+        boost: { title: 2 },
         tokenize: searchTokenize,
         processTerm: (term) => term.toLowerCase(),
         searchOptions: {
@@ -512,7 +565,7 @@ async function initPage() {
             combineWith: "AND",
         },
     });
-    miniSearch.addAll(ideas);
+    miniSearch.addAll(items);
 
     readStateFromURL();
     initFacetSelects();
@@ -619,11 +672,102 @@ function makeAccordion(selector) {
     section.replaceChildren(accordion);
 }
 
+function initIdeasetCards() {
+    const container = document.getElementById("ideaset-cards");
+    if (!container) return;
+
+    const cards = Array.from(container.querySelectorAll(".ideaset-card"));
+    const sentinel = document.getElementById("ideaset-more");
+    if (!cards.length) return;
+
+    const reducedMotion =
+        typeof window.matchMedia === "function" &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    let revealed = 1;
+    let observer = null;
+
+    const revealNext = () => {
+        if (revealed >= cards.length) {
+            if (sentinel) {
+                sentinel.innerHTML = '<p class="end-of-list">सर्व युक्त्या पाहिल्या</p>';
+            }
+            if (observer) observer.unobserve(sentinel);
+            return;
+        }
+        cards[revealed].classList.remove("card-hidden");
+        revealed += 1;
+    };
+
+    if (reducedMotion || typeof IntersectionObserver === "undefined") {
+        cards.forEach((card) => card.classList.remove("card-hidden"));
+        revealNext();
+        return;
+    }
+
+    observer = new IntersectionObserver((entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+            revealNext();
+        }
+    }, { rootMargin: "200px 0px" });
+    observer.observe(sentinel);
+}
+
+function initOnboardingHero() {
+    const hero = document.getElementById("onboarding-hero");
+    if (!hero) return;
+
+    const MAX_RUNS = 4;
+    const STEP_DURATION = 5000;
+    const FADE_DURATION = 2000;
+
+    const steps = Array.from(hero.querySelectorAll(".hero-step"));
+    if (!steps.length) return;
+
+    hero.classList.add("hero-js");
+    steps[0].classList.add("hero-step-active");
+
+    let index = 0;
+    let runs = 1;
+
+    const advance = () => {
+        index += 1;
+        if (index >= steps.length) {
+            if (runs >= MAX_RUNS) {
+                hero.classList.add("hero-collapsing");
+                setTimeout(() => {
+                    hero.hidden = true;
+                }, FADE_DURATION);
+                return;
+            }
+            runs += 1;
+            index = 0;
+        }
+        steps.forEach((step, i) => step.classList.toggle("hero-step-active", i === index));
+        setTimeout(advance, STEP_DURATION);
+    };
+
+    setTimeout(advance, STEP_DURATION);
+}
+
 function init() {
+    // Browsers restore the previous scroll position on reload, which can
+    // drop the user past the onboarding hero. Always start at the top.
+    if ("scrollRestoration" in history) {
+        history.scrollRestoration = "manual";
+    }
+    window.scrollTo(0, 0);
+
     // Catalogue pages do not depend on meta.json.
     // This makes their search work even when hosted
     // under a GitHub Pages project path.
     initCatalogueSearch();
+
+    // Idea set pages progressively reveal their pre-rendered member cards.
+    initIdeasetCards();
+
+    // The home page onboarding hero walks through the three-step journey.
+    initOnboardingHero();
 
     // The home page (the search page) needs meta.json for the MiniSearch index.
     if (document.getElementById("search-page")) 

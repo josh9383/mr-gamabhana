@@ -29,15 +29,6 @@
         "menu": false,
         "footer": true
       },
-      "categories": {
-        "path_name": "categories",
-        "title": "विभाग",
-        "description": "विभागांनुसार युक्त्या",
-        "field": "categories",
-        "mode": "multi",
-        "facet": true,
-        "menu" : false
-      },
       "concepts": {
         "path_name": "concepts",
         "title": "संकल्पना",
@@ -47,6 +38,15 @@
         "facet": true,
         "footer" : true,
         "menu": true
+      },
+      "categories": {
+        "path_name": "categories",
+        "title": "विभाग",
+        "description": "विभागांनुसार युक्त्या",
+        "field": "categories",
+        "mode": "multi",
+        "facet": true,
+        "menu" : false
       },
       "props": {
         "path_name": "props",
@@ -64,7 +64,7 @@
         "description": "युक्तीसंचानुसार युक्त्या",
         "field": "ideasets",
         "mode": "multi",
-        "facet": true,
+        "facet": false,
         "menu" : true,
         "footer": true
       }

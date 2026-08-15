@@ -4,32 +4,38 @@
 TBD - created by archiving change establish-project-baseline. Update Purpose after archive.
 ## Requirements
 ### Requirement: [REQ-CS-004: Tag query parameter pre-filters]
-Catalogue pages SHALL read a `tag` query parameter from the URL. When present, the page SHALL pre-filter its cards by running the tag through the page's MiniSearch index (with substring fallback) and populate the search input with the tag value.
+Catalogue landing pages and the ideas landing page SHALL read a `tag` query parameter from the URL. When present, the page SHALL pre-filter its cards by running the tag through the page's MiniSearch index (with substring fallback) and populate the search input with the tag value.
 
 #### Scenario: Tag parameter filters on load
-- **WHEN** a catalogue page loads with `?tag=कोन` in its URL
+- **WHEN** a catalogue landing page loads with `?tag=कोन` in its URL
 - **THEN** only cards whose searchable text matches `कोन` are visible
 - **AND** the search input is pre-filled with `कोन`
 
 ### Requirement: [REQ-CS-005: Graceful degradation on index failure]
-If `meta.json` cannot be loaded on the home page, the script SHALL log the error and leave the home page functional without breaking the catalogue-page search behaviour.
+If `meta.json` cannot be loaded on the home page or on an individual catalogue page, the script SHALL log the error and leave the page functional: the home page SHALL keep the landing-page card-search behaviour working, and an individual catalogue page SHALL keep its pre-rendered static card listing visible.
 
 #### Scenario: Missing meta.json degrades gracefully
-- **WHEN** `meta.json` fails to load on the home page
+- **WHEN** `meta.json` fails to load on the home page or on an individual catalogue page
 - **THEN** an error is logged to the console
-- **AND** catalogue-page filtering continues to work if a search input is present
+- **AND** catalogue landing-page filtering continues to work if a search input is present
+- **AND** the individual catalogue page still shows its pre-rendered card listing
 
 ### Requirement: [REQ-CS-003: Catalogue pages filter without meta.json]
-Catalogue pages SHALL build a MiniSearch index in the browser from their own `.catalogue-card` elements' searchable text and SHALL filter those cards in place using prefix and fuzzy matching, without loading `meta.json`, so they remain functional under GitHub Pages project paths. If the MiniSearch library is unavailable, the page SHALL fall back to substring filtering.
+Catalogue landing pages (`site/{path}/index.html`) and the ideas landing page SHALL build a MiniSearch index in the browser from their own `.catalogue-card` elements' searchable text and SHALL filter those cards in place using prefix and fuzzy matching, without loading `meta.json`, so they remain functional under GitHub Pages project paths. If the MiniSearch library is unavailable, the page SHALL fall back to substring filtering. Individual catalogue pages SHALL NOT use card-based filtering; they SHALL use the client index search described in REQ-CS-014.
 
-#### Scenario: Catalogue filter works standalone
-- **WHEN** a user types a query in a catalogue page's search box
+#### Scenario: Landing page filter works standalone
+- **WHEN** a user types a query in a catalogue landing page's search box
 - **THEN** each `.catalogue-card` is shown if the MiniSearch query matches its searchable text and hidden otherwise
-- **AND** no `meta.json` request is made on catalogue pages
+- **AND** no `meta.json` request is made on landing pages
 
-#### Scenario: Catalogue filter falls back to substring
-- **WHEN** the MiniSearch library is unavailable on a catalogue page
+#### Scenario: Landing page filter falls back to substring
+- **WHEN** the MiniSearch library is unavailable on a catalogue landing page
 - **THEN** cards are filtered by substring containment of the query
+
+#### Scenario: Individual pages do not use card filtering
+- **WHEN** a user opens an individual catalogue page such as `/standards/4/`
+- **THEN** its results come from the client index search
+- **AND** no card-based MiniSearch index is built over the page's cards
 
 ### Requirement: [REQ-CS-006: Search page full-text search]
 On the home page, the client script SHALL build a MiniSearch index from the `ideas` array of `site/meta.json` covering each idea's title (boosted), description, board, standard, subject, categories, concepts, props, and ideasets using a Unicode-aware tokenizer, and SHALL render ranked results for the trimmed query with prefix and fuzzy matching enabled. Results SHALL be rendered as Bootstrap cards with the `card` and `catalogue-card` classes containing an image cap (the idea's own images in order, or the bundled fallback), a `card-title`, a `card-text` description, and a `card-footer` listing prop badges when the `props` catalogue is active. The MiniSearch `storeFields` SHALL include `id`, `title`, `description`, `url`, `props`, `prop_slugs`, and `image_urls`.
@@ -161,4 +167,26 @@ The home page SHALL paginate the idea listing with an infinite scroll: it SHALL 
 - **WHEN** the user scrolls through several pages and then reloads the page
 - **THEN** the listing starts again from the first page
 - **AND** the URL contains no pagination parameters
+
+### Requirement: [REQ-CS-014: Individual catalogue page search and facets]
+Individual catalogue pages SHALL provide the same search experience as the home page, driven by `initPage()` over the `site/meta.json` ideas index and restricted to the page's scope: full-text search, facet panels with live counts, autosuggest, URL-shareable state, and infinite scroll pagination. The client script SHALL load `meta.json` from a base-URL-aware path (`data-meta-url`) so individual pages work under GitHub Pages project paths. The page's own catalogue facet SHALL be preselected, applied, and read-only per the `locked-facet` capability; the remaining facets SHALL filter within the page scope and SHALL compose with the text query.
+
+#### Scenario: Individual page provides full search within scope
+- **WHEN** a user types a query on `/standards/4/`
+- **THEN** the results restrict to standard 4 ideas and are ranked by the query
+- **AND** facet counts reflect the query within the standard 4 scope
+
+#### Scenario: Other facets compose with the page scope
+- **WHEN** a user selects a material facet on `/concepts/tulnaa/`
+- **THEN** only `तुलना` ideas with that material are shown
+- **AND** the material facet counts reflect the concepts scope
+
+#### Scenario: Meta.json loads from a base-URL-aware path
+- **WHEN** an individual catalogue page is hosted under a GitHub Pages project path
+- **THEN** the page fetches `meta.json` from the site base URL rather than from its own directory
+
+#### Scenario: URL state restores within the page scope
+- **WHEN** an individual catalogue page loads with a `q` query parameter and user-changeable facet parameters
+- **THEN** the query and those facets are restored
+- **AND** the results remain restricted to the page's locked scope
 

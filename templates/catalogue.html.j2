@@ -6,7 +6,9 @@
     <title>{{ title }} | {{ site.title }}</title>
     <meta name="description" content="{{ description }}">
     <link rel="canonical" href="{{ canonical_url }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css">
     <link rel="stylesheet" href="{{ site.theme_stylesheet }}">
+    <link rel="stylesheet" href="{{ site.base_url }}/assets/tom-select.bootstrap5.min.css">
     <link rel="stylesheet" href="{{ site.base_url }}/assets/style.css">
 
 <meta property="og:title" content="{{ title }} | {{ site.title }}" />
@@ -22,6 +24,38 @@
 </script>
 </head>
 <body>
+{% macro card(item) %}
+<div class="card catalogue-card" data-search="{{ item.search }}">
+    {% if not item.image_urls or item.image_urls|length == 0 %}
+    <img class="card-img-top" src="{{ site.base_url }}/assets/card-fallback.png" alt="{{ item.title }}">
+    {% elif item.image_urls|length == 1 %}
+    <img class="card-img-top" src="{{ site.base_url }}{{ item.image_urls[0] }}" alt="{{ item.title }}">
+    {% else %}
+    {% set num_images = item.image_urls|length if item.image_urls|length <= 6 else 6 %}
+    <div class="card-carousel card-carousel--{{ num_images }}">
+        {% for img_url in item.image_urls[:6] %}
+        <img src="{{ site.base_url }}{{ img_url }}" alt="{{ item.title }}" loading="lazy">
+        {% endfor %}
+    </div>
+    {% endif %}
+    <div class="card-body">
+        <h2 class="card-title h5"><a class="text-decoration-none" href="{{ item.url }}" >{{ item.title }}</a></h2>
+        {% if item.description %}<p class="card-text">{{ item.description }}</p>{% endif %}
+    </div>
+    {% if item.count is not none %}
+    <div class="card-footer">
+        <small>युक्त्या ({{ item.count }})</small>
+    </div>
+    {% elif item.footer_badges %}
+    <div class="card-footer d-flex flex-wrap gap-1">
+        {% for badge in item.footer_badges %}
+        <a class="badge badge-{{ badge.url.split('/')[1] }} text-decoration-none" href="{{ site.base_url }}{{ badge.url }}">{{ badge.value }}</a>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endmacro %}
+
 <nav class="navbar navbar-expand-lg bg-primary sticky-top" data-bs-theme="dark">
         <div class="container-fluid">
             <a class="navbar-brand" href="{{ site.base_url }}/">{{ site.title }}</a>
@@ -41,7 +75,7 @@
                         <span class="input-group-text" id="search-icon">
                             <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
                         </span>
-                         <input id="search-input" type="search" class="catalogue-search form-control phonetic-input" placeholder="शोधा..." autocomplete="off" aria-label="शोधा">
+                         <input id="search-input" type="search" class="{% if not locked_facet and not search_index %}catalogue-search {% endif %}form-control phonetic-input" placeholder="शोधा..." autocomplete="off" aria-label="शोधा">
                     </div>
                     <div id="autosuggest" class="autosuggest" hidden></div>
                 </div>
@@ -60,50 +94,42 @@
     <h1 class="h2">{{ title }}</h1>
     <p class="lead">{{ description }}</p>
 
-    <!--div class="facets row justify-content-center align-items-center">
+    {% if locked_facet or search_index %}
+    <div class="facets row justify-content-center">
             {% for type, label in facet_groups %}
+            {% if locked_facet and type == locked_facet.type %}
+            <div class="col-4 col-md-2 facet" data-facet="{{ type }}" data-label="{{ label }}" data-locked="true">
+                {% for value in locked_facet['values'] %}
+                <input type="text" class="form-control" value="{{ value }}" disabled readonly>
+                {% endfor %}
+            </div>
+            {% else %}
             <div class="col-4 col-md-2 facet" data-facet="{{ type }}" data-label="{{ label }}">
                 <select class="form-select facet-select" multiple aria-label="{{ label }}"></select>
             </div>
+            {% endif %}
             {% endfor %}
-            <div class="facet-actions mb-3">
+            <div class="col-4 col-md-2 facet-actions">
                 <button id="clear-facets" type="button" class="btn btn-sm"><i class="fa-solid fa-rotate"></i></button>
             </div>
-    </div-->
+    </div>
 
+    <div id="search-page" data-base-url="{{ site.base_url }}" data-meta-url="{{ site.base_url }}/meta.json"{% if search_index %} data-index="{{ search_index }}"{% endif %}{% if locked_facet %} data-locked-facet="{{ locked_facet.type }}" data-locked-values='{{ locked_facet['values'] | tojson }}'{% endif %}>
+        <p id="result-count" class="result-count"></p>
+        <div id="search-results" class="catalogue-grid">
+            {% for item in items %}
+            {{ card(item) }}
+            {% endfor %}
+        </div>
+        <div id="search-more" aria-live="polite"></div>
+    </div>
+    {% else %}
     <div class="catalogue-grid" id="catalogue-list">
         {% for item in items %}
-        <div class="card catalogue-card"  data-search="{{ item.search }}">
-            {% if not item.image_urls or item.image_urls|length == 0 %}
-            <img class="card-img-top" src="{{ site.base_url }}/assets/card-fallback.png" alt="{{ item.title }}">
-            {% elif item.image_urls|length == 1 %}
-            <img class="card-img-top" src="{{ site.base_url }}{{ item.image_urls[0] }}" alt="{{ item.title }}">
-            {% else %}
-            {% set num_images = item.image_urls|length if item.image_urls|length <= 6 else 6 %}
-            <div class="card-carousel card-carousel--{{ num_images }}">
-                {% for img_url in item.image_urls[:6] %}
-                <img src="{{ site.base_url }}{{ img_url }}" alt="{{ item.title }}" loading="lazy">
-                {% endfor %}
-            </div>
-            {% endif %}
-            <div class="card-body">
-                <h2 class="card-title h5"><a class="text-decoration-none" href="{{ item.url }}" >{{ item.title }}</a></h2>
-                {% if item.description %}<p class="card-text">{{ item.description }}</p>{% endif %}
-            </div>
-            {% if item.count is not none %}
-            <div class="card-footer">
-                <small>युक्त्या ({{ item.count }})</small>
-            </div>
-            {% elif item.footer_badges %}
-            <div class="card-footer d-flex flex-wrap gap-1">
-                {% for badge in item.footer_badges %}
-                <a class="badge badge-{{ badge.url.split('/')[1] }} text-decoration-none" href="{{ site.base_url }}{{ badge.url }}">{{ badge.value }}</a>
-                {% endfor %}
-            </div>
-            {% endif %}
-        </div>
+        {{ card(item) }}
         {% endfor %}
     </div>
+    {% endif %}
 </main>
 
 <script src="{{ site.bootstrap_script }}"></script>

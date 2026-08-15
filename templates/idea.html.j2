@@ -49,48 +49,36 @@
         </ol>
     </nav>
 
-    <article>
-        <header>
-            <h1 class="h2">{{ title }}</h1>
-            {% if description %}<p class="lead">{{ description }}</p>{% endif %}
-        </header>
+    <div class="card idea-page-card">
+        <div class="card-body">
+            <header>
+                <h1 class="h2">{{ title }}</h1>
+                {% if description %}<p class="lead">{{ description }}</p>{% endif %}
+            </header>
 
-        <div class="d-flex flex-wrap gap-2 mb-4">
-            {% if "categories" in catalogue_attributes %}
-            {% for category in categories %}
-            <a class="badge badge-categories text-decoration-none" href="{{ site.base_url }}/categories/{{ category_slugs[loop.index0] }}/">{{ category }}</a>
-            {% endfor %}
+            {% if not image_urls or image_urls|length == 0 %}
+            <img class="card-img-top" src="{{ site.base_url }}/assets/card-fallback.png" alt="{{ title }}">
+            {% elif image_urls|length == 1 %}
+            <img class="card-img-top" src="{{ site.base_url }}{{ image_urls[0] }}" alt="{{ title }}">
+            {% else %}
+            {% set num_images = image_urls|length if image_urls|length <= 6 else 6 %}
+            <div class="card-carousel card-carousel--{{ num_images }}">
+                {% for img_url in image_urls[:6] %}
+                <img src="{{ site.base_url }}{{ img_url }}" alt="{{ title }}" loading="lazy">
+                {% endfor %}
+            </div>
             {% endif %}
-            {% if "concepts" in catalogue_attributes %}
-            {% for concept in concepts %}
-            <a class="badge badge-concepts text-decoration-none" href="{{ site.base_url }}/concepts/{{ concept_slugs[loop.index0] }}/">{{ concept }}</a>
-            {% endfor %}
-            {% endif %}
-            {% if "props" in catalogue_attributes %}
-            {% for prop in props %}
-            <a class="badge  badge-props text-decoration-none" href="{{ site.base_url }}/props/{{ prop_slugs[loop.index0] }}/">{{ prop }}</a>
-            {% endfor %}
-            {% endif %}
-            {% for ideaset in ideasets %}
-            <a class="badge badge-ideasets text-decoration-none" href="{{ site.base_url }}/ideasets/{{ ideaset_slugs[loop.index0] }}/">{{ ideaset }}</a>
+
+            <div class="idea-content mt-3">{{ content_html }}</div>
+        </div>
+        {% if footer_badges %}
+        <div class="card-footer d-flex flex-wrap gap-1">
+            {% for badge in footer_badges %}
+            <a class="badge badge-{{ badge.url.split('/')[1] }} text-decoration-none" href="{{ site.base_url }}{{ badge.url }}">{{ badge.value }}</a>
             {% endfor %}
         </div>
-
-        <section class="idea-images row row-cols-3 g-3">
-        {% for image_url in image_urls %}
-            <div class="col">
-                <div class="bg-light border rounded overflow-hidden">
-                    <img src="{{ image_url }}" class="img-fluid" alt="Grid Image" />
-                </div>
-            </div>
-        {% endfor %}
-        </section>
-
-        <section class="idea-content mt-4">
-            {{ content_html }}
-        </section>
-
-    </article>
+        {% endif %}
+    </div>
 </main>
 
 <script src="{{ site.bootstrap_script }}"></script>

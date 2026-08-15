@@ -348,14 +348,21 @@ def catalogue_items(ideas, path_name, field, mode):
 def ideaset_catalogue_items(ideasets):
     return [
         {
+            "id": s["id"],
             "title": s["title"],
             "url": s["url"],
             "count": s["member_count"],
             "description": s["description"],
             "search": s["search"],
             "image_urls": s["representative_image_urls"],
-            "props": [],
-            "prop_slugs": [],
+            "standards": s["standards"],
+            "subjects": s["subjects"],
+            "categories": s["categories"],
+            "category_slugs": s["category_slugs"],
+            "concepts": s["concepts"],
+            "concept_slugs": s["concept_slugs"],
+            "props": s["props"],
+            "prop_slugs": s["prop_slugs"],
         }
         for s in ideasets
     ]
@@ -447,6 +454,7 @@ def main():
             **base_context,
             "content": content,
             "content_html": markdown(content, extensions=["extra", "toc"]),
+            "footer_badges": footer_badges_for(idea, catalogue_defs, footer_types),
         }
 
         output_dir = SITE / "ideas" / idea["id"]
@@ -496,6 +504,7 @@ def main():
                     load_idea_content(by_id[mid]),
                     extensions=["extra", "toc"],
                 ),
+                "footer_badges": footer_badges_for(by_id[mid], catalogue_defs, footer_types),
             }
             for mid in ideaset["member_ids"]
         ]
@@ -524,6 +533,23 @@ def main():
         landing_dir = SITE / path_name
         landing_dir.mkdir(parents=True, exist_ok=True)
 
+        if key == "ideasets":
+            # The ideasets landing page is the idea set search experience:
+            # it has no "ideasets" facet panel of its own.
+            (landing_dir / "index.html").write_text(
+                catalogue_template.render(
+                    **base_context,
+                    title=title,
+                    description=description,
+                    canonical_url=f"{site['base_url']}/{path_name}/",
+                    items=items,
+                    facet_groups=[g for g in facet_groups if g[0] != "ideasets"],
+                    search_index="ideasets",
+                ),
+                encoding="utf-8"
+            )
+            continue
+
         (landing_dir / "index.html").write_text(
             catalogue_template.render(
                 **base_context,
@@ -536,9 +562,6 @@ def main():
             encoding="utf-8"
         )
 
-        if key == "ideasets":
-            continue
-
         for item in items:
             matching = matching_ideas(ideas, field, mode, item["title"])
             item_dir = landing_dir / make_slug(item["title"])
@@ -550,7 +573,12 @@ def main():
                     description=f"{description}: {item['title']}",
                     canonical_url=f"{site['base_url']}/{path_name}/{make_slug(item['title'])}/",
                     items=[idea_card(c, catalogue_defs, footer_types) for c in matching],
-                    facet_groups=facet_groups
+                    facet_groups=facet_groups,
+                    locked_facet={
+                        "type": key,
+                        "label": title,
+                        "values": [item["title"]],
+                    },
                 ),
                 encoding="utf-8"
             )
