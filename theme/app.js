@@ -718,8 +718,8 @@ function initOnboardingHero() {
     if (!hero) return;
 
     const MAX_RUNS = 4;
-    const STEP_DURATION = 5000;
-    const FADE_DURATION = 2000;
+    const STEP_DURATION = 3500;
+    const FADE_DURATION = 600;
 
     const steps = Array.from(hero.querySelectorAll(".hero-step"));
     if (!steps.length) return;

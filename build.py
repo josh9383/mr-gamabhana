@@ -620,10 +620,7 @@ def main():
 
     shutil.copy(THEME / "style.css", SITE / "assets" / "style.css")
     shutil.copy(THEME / "app.js", SITE / "assets" / "app.js")
-    shutil.copy(THEME / "assets" / "minisearch.min.js", SITE / "assets" / "minisearch.min.js")
-    shutil.copy(THEME / "assets" / "tom-select.min.js", SITE / "assets" / "tom-select.min.js")
-    shutil.copy(THEME / "assets" / "tom-select.bootstrap5.min.css", SITE / "assets" / "tom-select.bootstrap5.min.css")
-    shutil.copy(THEME / "assets" / "card-fallback.png", SITE / "assets" / "card-fallback.png")
+    shutil.copytree(THEME / "assets", SITE / "assets", dirs_exist_ok=True)
 
     print(f"Built {len(ideas)} ideas across {len(ideasets)} idea sets.")
 

@@ -88,7 +88,7 @@ The build SHALL generate `site/sitemap.xml` listing the home URL, the ideas land
 - **THEN** each idea set page URL appears exactly once in `site/sitemap.xml`
 
 ### Requirement: [REQ-SO-007: Static assets copied to site]
-The build SHALL copy `theme/style.css`, `theme/app.js`, `theme/assets/minisearch.min.js`, `theme/assets/tom-select.min.js`, `theme/assets/tom-select.bootstrap5.min.css`, and `theme/assets/card-fallback.png` into `site/assets/` so all pages reference assets from the generated site.
+The build SHALL copy `theme/style.css`, `theme/app.js`, and the complete contents of the `theme/assets/` directory into `site/assets/` so all pages reference assets from the generated site. Every file present in `theme/assets/` SHALL be copied; the build SHALL NOT require an explicit list of asset filenames.
 
 #### Scenario: Assets are available in site
 - **WHEN** the build completes
@@ -98,6 +98,16 @@ The build SHALL copy `theme/style.css`, `theme/app.js`, `theme/assets/minisearch
 #### Scenario: Tom Select assets are copied
 - **WHEN** the build completes
 - **THEN** `site/assets/tom-select.min.js` and `site/assets/tom-select.bootstrap5.min.css` exist alongside the other static assets
+
+#### Scenario: Whole assets folder is copied
+- **WHEN** the build completes
+- **THEN** every file present in `theme/assets/` exists in `site/assets/`
+- **AND** adding a new file to `theme/assets/` does not require a `build.py` change to ship it
+
+#### Scenario: Logo assets are copied
+- **WHEN** the build completes
+- **THEN** `site/assets/logo_color.png`, `site/assets/logo_dark.png`, and `site/assets/logo_light.png` exist
+- **AND** the home page navbar brand referencing `assets/{{ site.logo }}` resolves
 
 ### Requirement: [REQ-SO-008: SEO metadata on pages]
 Generated HTML pages SHALL declare `lang` from the site language, a unique `<title>`, a `<meta name="description">`, and a self-referencing `<link rel="canonical">`. Idea and catalogue pages SHALL render a breadcrumb navigation.
