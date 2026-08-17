@@ -7,5 +7,10 @@
   "subject": "गणित",
   "categories": ["वर्गातील प्रयोग"],
   "concepts": ["अपूर्णांक", "पट"],
-  "images": ["1.jpg"]
+  "images": ["1.jpg"],
+  "rating" : {
+    "relevance": 4,
+    "experience" : 4,
+    "resources" : 4
+  } 
 }

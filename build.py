@@ -621,6 +621,7 @@ def main():
     shutil.copy(THEME / "style.css", SITE / "assets" / "style.css")
     shutil.copy(THEME / "app.js", SITE / "assets" / "app.js")
     shutil.copytree(THEME / "assets", SITE / "assets", dirs_exist_ok=True)
+    shutil.copytree(THEME / "pages", SITE / "pages", dirs_exist_ok=True)
 
     print(f"Built {len(ideas)} ideas across {len(ideasets)} idea sets.")
 

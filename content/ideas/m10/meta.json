@@ -1,0 +1,16 @@
+{
+  "title": "वीत ते सेंटीमीटर - मापनाची गरज",
+  "props": ["फीत", "पट्टी"],
+  "ideasets": ["मापन"],
+  "board": "महाराष्ट्र राज्य मंडळ",
+  "standard": 4,
+  "subject": "गणित",
+  "categories": ["वर्गातील प्रयोग", "गट-उपक्रम"],
+  "concepts": ["मापन"],
+  "images": ["1.jpg"],
+  "rating": {
+    "relevance": 4,
+    "experience": 4,
+    "resources": 5
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Generated schema for Root",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "props": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "ideasets": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "board": {
+      "type": "string"
+    },
+    "standard": {
+      "type": "number"
+    },
+    "subject": {
+      "type": "string"
+    },
+    "categories": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "concepts": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "images": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "rating": {
+      "type": "object",
+      "properties": {
+        "relevance": {
+          "type": "number"
+        },
+        "experience": {
+          "type": "number"
+        },
+        "resources": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "relevance",
+        "experience",
+        "resources"
+      ]
+    }
+  },
+  "required": [
+    "title",
+    "props",
+    "ideasets",
+    "board",
+    "standard",
+    "subject",
+    "categories",
+    "concepts",
+    "images",
+    "rating"
+  ]
+}
