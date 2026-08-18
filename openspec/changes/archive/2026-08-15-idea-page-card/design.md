@@ -1,6 +1,6 @@
 ## Context
 
-Individual idea pages are rendered by `templates/idea.html.j2` as an `article` with a `header` (title + optional lead), a hardcoded badge row (`categories`/`concepts`/`props`/`ideasets` only), a `row-cols-3` thumbnail grid of `image_urls`, and the converted Markdown body in `.idea-content`. The page already loads Bootstrap JS and `assets/app.js` and includes canonical/`og:` meta, breadcrumb, watermark, and navbar. Idea set pages (`ideaset.html.j2`) now render member ideas as full-width cards — `.card-body` (title link, description, fallback/single/carousel photos, `.idea-content`) plus a `.card-footer` of `footer_badges`. In `build.py`, `footer_badges_for(idea, catalogue_defs, footer_types)` already produces the badge list used by idea-card and idea set card footers, but the idea page render context (`**idea`, `**base_context`, `content`, `content_html`) does not carry `footer_badges`.
+Individual idea pages are rendered by `templates/idea.html.j2` as an `article` with a `header` (title + optional lead), a hardcoded badge row (`categories`/`concepts`/`props`/`ideasets` only), a `row-cols-3` thumbnail grid of `image_urls`, and the converted Markdown body in `.idea-content`. The page already loads Bootstrap JS and `assets/app.js` and includes canonical/`og:` meta, breadcrumb, watermark, and navbar. Idea set pages (`ideaset.html.j2`) now render member ideas as full-width cards - `.card-body` (title link, description, fallback/single/carousel photos, `.idea-content`) plus a `.card-footer` of `footer_badges`. In `build.py`, `footer_badges_for(idea, catalogue_defs, footer_types)` already produces the badge list used by idea-card and idea set card footers, but the idea page render context (`**idea`, `**base_context`, `content`, `content_html`) does not carry `footer_badges`.
 
 ## Goals / Non-Goals
 
@@ -22,15 +22,15 @@ Individual idea pages are rendered by `templates/idea.html.j2` as an `article` w
 
 ### D1. Single full-width card reusing the idea set card components
 
-The `article` layout is replaced by one `.card.idea-page-card`. Inside `.card-body`: an `h1` title (kept as the page heading, unlike the idea set cards' linked `h2` — the idea page is the idea's own page), the lead description, the photos, and `.idea-content` with `content_html`. The `card-footer` renders `footer_badges` exactly like idea set card footers (`badge badge-{path} text-decoration-none`). The card spans the full container width at every screen size.
+The `article` layout is replaced by one `.card.idea-page-card`. Inside `.card-body`: an `h1` title (kept as the page heading, unlike the idea set cards' linked `h2` - the idea page is the idea's own page), the lead description, the photos, and `.idea-content` with `content_html`. The `card-footer` renders `footer_badges` exactly like idea set card footers (`badge badge-{path} text-decoration-none`). The card spans the full container width at every screen size.
 
-- Alternative: keep the article/header/grid and only restyle it — rejected: the user asked for the same card design, and the header-badge-row/thumbnail-grid pattern is inconsistent with the rest of the site.
+- Alternative: keep the article/header/grid and only restyle it - rejected: the user asked for the same card design, and the header-badge-row/thumbnail-grid pattern is inconsistent with the rest of the site.
 
 ### D2. Footer badges come from `footer_badges_for`
 
-`build.py` adds `"footer_badges": footer_badges_for(idea, catalogue_defs, footer_types)` to each idea page render context. This replaces the template's hardcoded `categories`/`concepts`/`props`/`ideasets` badge row with the shared config-driven computation used by idea cards and idea set cards — every active catalogue type with `footer: true` (e.g., boards, standards, subjects when active).
+`build.py` adds `"footer_badges": footer_badges_for(idea, catalogue_defs, footer_types)` to each idea page render context. This replaces the template's hardcoded `categories`/`concepts`/`props`/`ideasets` badge row with the shared config-driven computation used by idea cards and idea set cards - every active catalogue type with `footer: true` (e.g., boards, standards, subjects when active).
 
-- Alternative: keep the hardcoded badge row and only change the layout — rejected: it would leave the idea page footer different from every other card on the site.
+- Alternative: keep the hardcoded badge row and only change the layout - rejected: it would leave the idea page footer different from every other card on the site.
 - Trade-off: when `boards`/`standards`/`subjects` are active they now appear as footer badges on the idea page (previously absent). This is intended: the idea page is the canonical place to see all of an idea's catalogue attributes.
 
 ### D3. Photos reuse the fallback/single/carousel markup

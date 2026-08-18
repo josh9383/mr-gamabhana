@@ -1,4 +1,4 @@
-# Design — Split Content Per Idea
+# Design - Split Content Per Idea
 
 ## Context
 
@@ -22,28 +22,28 @@ The goal is atomic per-idea content: every idea becomes a self-contained directo
 
 ## Decisions
 
-**D1 — Per-idea directory layout.**
+**D1 - Per-idea directory layout.**
 Each idea moves from `content/ideas/{id}.md` to a directory `content/ideas/{id}/` containing `meta.json` and `meta.md`. The directory name is the idea's `id` (stable slug), matching today's `/ideas/{id}/` URL and slug-enrichment keying.
 
 *Alternatives:* Keeping the flat body file and only splitting metadata (rejected: does not achieve atomic per-idea directories); numbering directories (rejected: ids are already stable and URL-facing).
 
-**D2 — Build-time discovery via `content/ideas/*/meta.json`.**
+**D2 - Build-time discovery via `content/ideas/*/meta.json`.**
 `build.py` uses `Path.glob("content/ideas/*/meta.json")` to enumerate ideas. Each `meta.json` holds exactly one idea record; the build clubs them into an `ideas` list. Iterating the directory means adding/removing an idea is just adding/removing its folder.
 
 *Alternatives:* Keeping a separate index file listing idea ids (rejected: reintroduces the monolithic coupling this change removes).
 
-**D3 — `content/site.json` holds the `site` object only.**
+**D3 - `content/site.json` holds the `site` object only.**
 The `site` object is read by `load_site()` from `content/site.json`. All templates receive `site` unchanged (same fields `title`, `description`, `language`, `base_url_live`, `base_url`).
 
-**D4 — Output payload renamed to `site/ideas.json`.**
+**D4 - Output payload renamed to `site/ideas.json`.**
 The client-side payload keeps its shape but is written to `SITE / "ideas.json"`. `theme/app.js` fetches `"ideas.json"`. This aligns the generated payload name with its content (`ideas`) and the per-idea source layout.
 
-**D5 — `load_data()` split into two pure functions.**
+**D5 - `load_data()` split into two pure functions.**
 `load_data()` (single-source loader) is replaced by `load_site()` (returns the `site` object from `content/site.json`) and `load_ideas()` (returns the clubbed `ideas` list). `load_idea_content(idea)` reads `content/ideas/{id}/meta.md`. This keeps data-parsing isolated from rendering per the layered-service constraint.
 
 ## Risks / Trade-offs
 
-- **BREAKING content layout** — existing `content/ideas.json` and `content/ideas/*.md` paths are replaced. Mitigated by documenting the new layout in `README.md` and the config context, and by the build failing fast if `content/site.json` or any `meta.md` is missing.
-- **Missing `meta.md` for an idea** — would silently drop body content. Mitigated by failing the build (REQ-CM-003 scenario) rather than generating a partial page.
-- **Stale references to `site/index.json`** — any remaining fetcher would 404. Mitigated by updating `theme/app.js` and grepping the repo for `index.json` during verification.
-- **Sort order of the clubbed ideas list** — `Path.glob` order is filesystem-dependent. The build sorts ideas by `id` after loading to keep output deterministic.
+- **BREAKING content layout** - existing `content/ideas.json` and `content/ideas/*.md` paths are replaced. Mitigated by documenting the new layout in `README.md` and the config context, and by the build failing fast if `content/site.json` or any `meta.md` is missing.
+- **Missing `meta.md` for an idea** - would silently drop body content. Mitigated by failing the build (REQ-CM-003 scenario) rather than generating a partial page.
+- **Stale references to `site/index.json`** - any remaining fetcher would 404. Mitigated by updating `theme/app.js` and grepping the repo for `index.json` during verification.
+- **Sort order of the clubbed ideas list** - `Path.glob` order is filesystem-dependent. The build sorts ideas by `id` after loading to keep output deterministic.

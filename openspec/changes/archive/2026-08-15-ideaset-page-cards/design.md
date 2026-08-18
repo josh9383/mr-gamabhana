@@ -24,14 +24,14 @@ Individual idea set pages are rendered by `templates/ideaset.html.j2` as a Boots
 
 The template renders every member idea as a `card` inside `#ideaset-cards`; cards beyond the first are hidden with the existing `card-hidden` class. A `#ideaset-more` sentinel is observed with an IntersectionObserver; when it enters the viewport, the next batch of cards is revealed, and a `सर्व युक्त्या पाहिल्या` end marker is shown once all cards are visible. All cards remain in the DOM (no-JS fallback: the page simply shows everything).
 
-- Alternative: fetch idea JSON at runtime and build cards dynamically — rejected: adds a payload + render pipeline for no benefit, and breaks the no-JS guarantee.
-- Alternative: render everything with no reveal — rejected: the user explicitly wants scroll-to-load ("load next idea").
+- Alternative: fetch idea JSON at runtime and build cards dynamically - rejected: adds a payload + render pipeline for no benefit, and breaks the no-JS guarantee.
+- Alternative: render everything with no reveal - rejected: the user explicitly wants scroll-to-load ("load next idea").
 
 ### D2. Dedicated single-column container
 
 A new `#ideaset-cards` block styles the list as one full-width column (CSS: `display: flex; flex-direction: column; gap`) with cards taking the full container width at all breakpoints. The first card is visible on load; the container needs no grid columns.
 
-- Alternative: reuse `.catalogue-grid` — rejected: it is `repeat(auto-fill, minmax(220px, 1fr))` and would produce multi-column cards that conflict with the full-content layout.
+- Alternative: reuse `.catalogue-grid` - rejected: it is `repeat(auto-fill, minmax(220px, 1fr))` and would produce multi-column cards that conflict with the full-content layout.
 
 ### D3. Footer badges reuse the idea-card computation
 
@@ -41,7 +41,7 @@ A new `#ideaset-cards` block styles the list as one full-width column (CSS: `dis
 
 `initIdeasetCards()` reveals a single card per sentinel intersection (PAGE_SIZE = 1, matching "load next idea"), using the same observer pattern as `initPage()`'s infinite scroll. A `prefers-reduced-motion` style keeps all cards visible for reduced-motion users.
 
-- Alternative: reveal multiple cards per step — rejected as it dilutes the requested one-at-a-time reading experience.
+- Alternative: reveal multiple cards per step - rejected as it dilutes the requested one-at-a-time reading experience.
 
 ### D5. Client entry point without disturbing existing dispatchers
 

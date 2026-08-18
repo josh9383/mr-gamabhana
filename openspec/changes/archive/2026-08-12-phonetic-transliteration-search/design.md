@@ -23,7 +23,7 @@ gamabhana.com provides a live phonetic-input widget: a launcher script (`https:/
 **D1. Load the widget as a static parse-time script tag.**
 The launcher calls `document.write` immediately, which is only safe while the parser is running. Injecting it dynamically from `app.js` would wipe the document. Therefore `templates/home.html.j2` and `templates/catalogue.html.j2` get a plain `<script src="https://www.gamabhana.com/gamabhanaWidget/add/?mode=custom&c=phonetic-input&lang=0"></script>` placed in the body just before `app.js`.
 Rationale: only viable integration given `document.write`; static tags are consistent with how the theme/bootstrap scripts are loaded.
-Alternative: dynamic injection (rejected — would destroy the page).
+Alternative: dynamic injection (rejected - would destroy the page).
 
 **D2. Target the search inputs with one shared class.**
 Add `phonetic-input` to both `#search-input` (home) and `.catalogue-search` (catalogue) inputs and launch the widget with `mode=custom&c=phonetic-input&lang=0`. `c` is a comma-separated class list the widget passes into its engine URL (verified in the live launcher output).
@@ -35,12 +35,12 @@ Add a pure function `phoneticToDevanagari(text)` to `app.js` and apply it to the
 - widget failed to load → the field value stays Roman → function converts it;
 - widget lagging a keystroke → the current value is converted exactly once.
 Rationale: deterministic, single code path, no timing/race detection; trivially testable headlessly.
-Alternative: feature-detect the widget (rejected — no reliable global/API contract from the packed launcher).
+Alternative: feature-detect the widget (rejected - no reliable global/API contract from the packed launcher).
 
 **D4. Compact I-trans-style transliteration.**
 `phoneticToDevanagari` implements a longest-match syllable mapper: normalize case and Unicode diacritics (`ā ī ū ṛ ṅ ñ ṭ ḍ ṇ ś ṣ ḷ`), map digraphs (`kh ch th ph bh gh jh ṭh ḍh sh ksh` etc.), apply implicit `a`, vowel matras, and the halant (`्`) before a following consonant. Includes Marathi `ळ` and the `क्ष`/`ज्ञ` conjuncts. Pure, dependency-free, ~70 lines.
 Rationale: vanilla-stack compliance; `indic-transliteration` would be a heavyweight external-library exception for a fallback path.
-Limitation: approximate for unusual spellings — acceptable because MiniSearch runs with `fuzzy: 0.2` and the primary path is the gamabhana widget.
+Limitation: approximate for unusual spellings - acceptable because MiniSearch runs with `fuzzy: 0.2` and the primary path is the gamabhana widget.
 
 **D5. Keep existing event handlers untouched.**
 The widget produces Devanagari through the normal value + `input` event path. Our listeners stay exactly as they are; only the query string passed into the search pipeline is wrapped by `phoneticToDevanagari`.
@@ -48,7 +48,7 @@ Rationale: minimal diff, preserves all current tested behavior.
 
 **D6. Extend the REQ-SO-009 exception to the widget URL.**
 The self-containment rule already permits configured theme stylesheet/script URLs; extend the exception to the fixed gamabhana widget script URL.
-Rationale: keeps the guarantee honest — one documented, pinned external script beyond the theme pair.
+Rationale: keeps the guarantee honest - one documented, pinned external script beyond the theme pair.
 
 ## Risks / Trade-offs
 

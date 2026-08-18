@@ -2,7 +2,7 @@
 
 Catalogue configuration is split across two files. `build.py` hardcodes `CATALOGUE_DEFS` (path names, Marathi titles and descriptions, idea field mapping, and `single`/`multi` mode for all seven catalogue types) while `content/site.json` independently lists the active types in `catalogue_attributes`. The build then derives home facets with a hardcoded rule ("all active types except `ideasets`"). Adding or reconfiguring a catalogue type requires touching both files, and whether a type appears as a home facet is not configurable at all.
 
-The generated client-side payload is also misnamed: `site/ideas.json` no longer contains only ideas — it carries the `site` object, the `ideas` array, and the `catalogues`. Per-idea content files are named `meta.json`, so naming the generated payload `meta.json` is consistent and accurate.
+The generated client-side payload is also misnamed: `site/ideas.json` no longer contains only ideas - it carries the `site` object, the `ideas` array, and the `catalogues`. Per-idea content files are named `meta.json`, so naming the generated payload `meta.json` is consistent and accurate.
 
 ## What Changes
 
@@ -31,11 +31,11 @@ The generated client-side payload is also misnamed: `site/ideas.json` no longer 
 ## Impact
 
 - **Files created/updated:**
-  - `build.py` — remove the hardcoded `CATALOGUE_DEFS`, load catalogue definitions from `site.json`, derive `active_types`/`facet_types`/`facet_groups` from the `catalogues` node, write `site/meta.json`.
-  - `content/site.json` — replace `catalogue_attributes` with the `catalogues` object (same active types, same Marathi metadata, `facet` true except `ideasets`).
-  - `theme/app.js` — fetch `meta.json`; use `facet_types` directly.
-  - `README.md` — `ideas.json` → `meta.json`.
-  - `site/` — regenerated output (including the renamed `site/meta.json`).
+  - `build.py` - remove the hardcoded `CATALOGUE_DEFS`, load catalogue definitions from `site.json`, derive `active_types`/`facet_types`/`facet_groups` from the `catalogues` node, write `site/meta.json`.
+  - `content/site.json` - replace `catalogue_attributes` with the `catalogues` object (same active types, same Marathi metadata, `facet` true except `ideasets`).
+  - `theme/app.js` - fetch `meta.json`; use `facet_types` directly.
+  - `README.md` - `ideas.json` → `meta.json`.
+  - `site/` - regenerated output (including the renamed `site/meta.json`).
 - **Unchanged:** `templates/` (the `facet_groups`/`catalogue_attributes` template context variables keep their names), catalogue/idea/ideaset page markup, the payload shape (`site`/`ideas`/`catalogues` keys), URL state semantics, and per-idea `content/ideas/{id}/meta.json` files.
 - **Dependencies:** None new.
 - **Constraints, Limitations, Assumptions:**

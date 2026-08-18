@@ -28,33 +28,33 @@ The home page (`templates/home.html.j2`) renders navbar → `<main class="contai
 
 `templates/home.html.j2` gains a `<section id="onboarding-hero">` immediately after `</nav>` and before `<main>`, in normal document flow. It contains a `.hero-steps alert alert-light` with three `.hero-step` blocks, each a single `<h4>` with the step copy (शोधा → निवडा → प्रयोग करून पहा). The page is enhanced by `initOnboardingHero()` which adds a `hero-js` class to the section; the CSS only applies the single-step stacked behaviour under `.hero-js`. Without JavaScript the three steps render as ordinary stacked blocks.
 
-- Alternative: inject the hero with JS `innerHTML` — rejected: the rules require static/deterministic template output and no runtime DOM injection for core chrome; static markup also gives the no-JS fallback for free.
+- Alternative: inject the hero with JS `innerHTML` - rejected: the rules require static/deterministic template output and no runtime DOM injection for core chrome; static markup also gives the no-JS fallback for free.
 
 ### D2. Non-blocking in-flow design
 
-The hero is a normal block section — never `position: fixed/absolute`, never a full-screen overlay, no `pointer-events` manipulation. The navbar search stays above it, the facets and results below it, so catalogue interaction is fully usable while the sequence runs. The sequence only toggles CSS classes on its own steps.
+The hero is a normal block section - never `position: fixed/absolute`, never a full-screen overlay, no `pointer-events` manipulation. The navbar search stays above it, the facets and results below it, so catalogue interaction is fully usable while the sequence runs. The sequence only toggles CSS classes on its own steps.
 
-- Alternative: modal or toast overlay — rejected: would cover/block the interface, violating the non-blocking requirement.
+- Alternative: modal or toast overlay - rejected: would cover/block the interface, violating the non-blocking requirement.
 
 ### D3. Single-step display via CSS-grid stacking
 
 Under `.hero-js`, `.hero-steps` becomes a grid and every `.hero-step` occupies the same cell (`grid-area: 1 / 1`). Active step: `opacity: 1; transform: none; visibility: visible;`. Inactive steps: `opacity: 0; transform: translateY(6px); visibility: hidden;`, all with `transition: opacity .35s ease, transform .35s ease, visibility .35s`. `visibility` animates discretely at the end of the transition, so steps fade/slide in and out and inactive steps drop out of the accessibility tree. `aria-live="polite"` on the section announces step changes.
 
-- Alternative: `display: none` toggling — rejected: it cannot fade/slide and removes content abruptly.
-- Alternative: JS-driven opacity animation — rejected: animation belongs in CSS, and the rules forbid flashy JS animation; CSS transitions keep it subtle.
+- Alternative: `display: none` toggling - rejected: it cannot fade/slide and removes content abruptly.
+- Alternative: JS-driven opacity animation - rejected: animation belongs in CSS, and the rules forbid flashy JS animation; CSS transitions keep it subtle.
 
 ### D4. Timing, advance, and collapse
 
 `initOnboardingHero()` runs the sequence with `STEP_DURATION = 4000` ms: reveal step 1 on load, then every 4 s swap to the next step by moving the `.hero-step-active` class (CSS transitions handle the fade/slide). After the sequence completes, the section fades out (`.hero-collapsing`), then gets the `hidden` attribute after ~550 ms (`FADE_DURATION`) so it leaves the layout. The sequence is a simple self-contained timer chain (no `setInterval` lingering after completion).
 
-- Alternative: `setInterval` with a counter — rejected: the timer must stop cleanly after the last step; a chained `setTimeout` sequence is simpler to stop.
+- Alternative: `setInterval` with a counter - rejected: the timer must stop cleanly after the last step; a chained `setTimeout` sequence is simpler to stop.
 
 ### D5. Sequence cycles MAX_RUNS times per page load, no persistent state
 
-The hero runs the full three-step cycle `MAX_RUNS = 4` times on every page load: after the third step completes, the run counter increments and the sequence restarts at step 1; after the fourth cycle the section collapses. No `sessionStorage`, `localStorage`, or other state is read or written — the hero behaves identically on every load.
+The hero runs the full three-step cycle `MAX_RUNS = 4` times on every page load: after the third step completes, the run counter increments and the sequence restarts at step 1; after the fourth cycle the section collapses. No `sessionStorage`, `localStorage`, or other state is read or written - the hero behaves identically on every load.
 
-- Alternative: session-scoped cap via `sessionStorage` — rejected: the user explicitly wants the hero to run on every page load, not bound to a session.
-- Alternative: `localStorage` lifetime cap — rejected: would permanently hide the hero after a fixed number of visits.
+- Alternative: session-scoped cap via `sessionStorage` - rejected: the user explicitly wants the hero to run on every page load, not bound to a session.
+- Alternative: `localStorage` lifetime cap - rejected: would permanently hide the hero after a fixed number of visits.
 
 ### D6. Reduced motion and no-JS
 
@@ -68,7 +68,7 @@ The hero runs the full three-step cycle `MAX_RUNS = 4` times on every page load:
 
 Browsers restore the previous scroll position on reload, which can drop the user past the hero and to the bottom of the results. `init()` therefore sets `history.scrollRestoration = "manual"` (disabling restoration) and calls `window.scrollTo(0, 0)` before dispatching the page initializers, so every load and refresh renders at the top with the hero in view.
 
-- Alternative: leave restoration enabled — rejected: refresh after scrolling buried the hero, which is why this decision exists.
+- Alternative: leave restoration enabled - rejected: refresh after scrolling buried the hero, which is why this decision exists.
 
 ## Risks / Trade-offs
 

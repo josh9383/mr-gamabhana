@@ -42,14 +42,14 @@ Constraint note: the config constraint "no external libraries" is relaxed for Mi
 ### D4. Faceted search model
 - **Decision:** A single source-of-truth state object `{ q: '', board: [], standard: [], subject: [], category: [], concept: [], prop: [] }`. Within one facet, selected values OR together; across facets, AND; facets AND with the text query. When `q` is empty and no facets are active, the page lists every idea.
 - **Facet counts:** each facet's counts are computed over the set filtered by the query and by every *other* active facet (excluding its own selections), so clicking a checkbox never shows a disabled/zero option due to itself.
-- **Decision:** Rebuild the full result set on any state change (tiny corpus — simple and correct), then re-render facets and results from that set.
+- **Decision:** Rebuild the full result set on any state change (tiny corpus - simple and correct), then re-render facets and results from that set.
 - **Rationale:** Matches standard faceted-search UX (e.g., e-commerce), is stateless/procedural per the layered architecture, and keeps a single source of truth.
 
 ### D5. URL state
 - **Decision:** Read `q`, `board`, `standard`, `subject`, `category`, `concept`, `prop` (repeatable) params on load and seed the state; write them back on every change via `history.replaceState` so back/forward history isn't spammed while searches remain shareable.
 
 ### D6. Page structure and rendering
-- **Decision:** `templates/search.html.j2` renders the site header (with search link active), a full-width search input, a two-column layout — left facet panels (checkboxes + counts per group, plus a "सर्व साफ करा" clear-all) and right a results area (`#search-results`) with a result-count line and `.catalogue-card` result anchors. All DOM injection via template literals in `app.js`; all styling in `theme/style.css`. `initSearchPage()` is registered in `init()` only when the `#search-page` container exists, keeping catalogue-page behavior independent of `ideas.json`.
+- **Decision:** `templates/search.html.j2` renders the site header (with search link active), a full-width search input, a two-column layout - left facet panels (checkboxes + counts per group, plus a "सर्व साफ करा" clear-all) and right a results area (`#search-results`) with a result-count line and `.catalogue-card` result anchors. All DOM injection via template literals in `app.js`; all styling in `theme/style.css`. `initSearchPage()` is registered in `init()` only when the `#search-page` container exists, keeping catalogue-page behavior independent of `ideas.json`.
 - **Rationale:** Follows the existing "centralized coordinator module" pattern in `app.js` and the no-inline-style/script rules.
 
 ## Risks / Trade-offs

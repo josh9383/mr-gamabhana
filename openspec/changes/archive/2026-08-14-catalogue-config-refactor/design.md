@@ -1,6 +1,6 @@
 ## Context
 
-Catalogue configuration currently lives in two places. `build.py` hardcodes `CATALOGUE_DEFS` — a dict mapping seven type keys to `(path_name, title, description, idea_field, mode)` tuples with Marathi titles and descriptions (build.py:20-30). `content/site.json` separately lists the active types in `catalogue_attributes` (currently `["categories", "concepts", "props", "ideasets", "standard", "subject"]`). The home facet list is derived with a hardcoded rule — all active types except `ideasets` (build.py:297-302) — and exposed to the client as `site["facet_types"]`. The client payload is written to `site/ideas.json` (build.py:425) and fetched by `theme/app.js` `loadIndex()`; `app.js` resolves facets from `data.site.facet_types` with a `catalogue_attributes` fallback (app.js:135-136).
+Catalogue configuration currently lives in two places. `build.py` hardcodes `CATALOGUE_DEFS` - a dict mapping seven type keys to `(path_name, title, description, idea_field, mode)` tuples with Marathi titles and descriptions (build.py:20-30). `content/site.json` separately lists the active types in `catalogue_attributes` (currently `["categories", "concepts", "props", "ideasets", "standard", "subject"]`). The home facet list is derived with a hardcoded rule - all active types except `ideasets` (build.py:297-302) - and exposed to the client as `site["facet_types"]`. The client payload is written to `site/ideas.json` (build.py:425) and fetched by `theme/app.js` `loadIndex()`; `app.js` resolves facets from `data.site.facet_types` with a `catalogue_attributes` fallback (app.js:135-136).
 
 ## Goals / Non-Goals
 
@@ -21,11 +21,11 @@ Catalogue configuration currently lives in two places. `build.py` hardcodes `CAT
 
 **D1: `catalogues` node in `content/site.json`.**
 Add a `catalogues` object mapping each active type key to a definition: `path_name`, `title`, `description`, `field`, `mode` (`single`/`multi`), and `facet` (bool). Keys are ordered to preserve the current facet order (categories, concepts, props, standard, subject); `ideasets` gets `facet: false`. The `catalogue_attributes` array is deleted. Active types = keys of `catalogues`.
-- Alternative considered: keeping `catalogue_attributes` and adding a parallel `facet_types` list — rejected because two config sources are exactly the duplication this change removes; the `facet` flag on each catalogue definition is the single source.
+- Alternative considered: keeping `catalogue_attributes` and adding a parallel `facet_types` list - rejected because two config sources are exactly the duplication this change removes; the `facet` flag on each catalogue definition is the single source.
 
 **D2: Build loads catalogue definitions, falls back on absent config.**
 `build.py` replaces the module-level `CATALOGUE_DEFS` constant with `load_catalogue_defs(site)` reading `site.get("catalogues")`; when absent or empty it returns a legacy default dict (the current seven types with the same Marathi metadata, `facet` true except `ideasets`). Entries become dicts `{"path_name", "title", "description", "field", "mode", "facet"}` instead of tuples. `active_types` comes from the definition keys; for backward compatibility a legacy `catalogue_attributes` list (if still present) is still honored as a subset filter.
-- Alternative considered: keeping `CATALOGUE_DEFS` and only adding the `facet` flag — rejected because the user asked for the definitions to live in `site.json`.
+- Alternative considered: keeping `CATALOGUE_DEFS` and only adding the `facet` flag - rejected because the user asked for the definitions to live in `site.json`.
 
 **D3: Active types, facets, and generation all derive from the loaded definitions.**
 - `active_types = list(catalogue_defs)` (order = `catalogues` key order, preserving the current facet panel order).
@@ -38,7 +38,7 @@ Add a `catalogues` object mapping each active type key to a definition: `path_na
 `build.py` writes `SITE / "meta.json"` instead of `SITE / "ideas.json"`. `theme/app.js` `loadIndex()` fetches `"meta.json"` and the error message becomes `Could not load meta.json: ...`. Comments in `app.js` referencing `ideas.json` are updated. `README.md` is updated. The payload shape is unchanged.
 
 **D5: Client reads `facet_types` only.**
-Since the payload's `site` no longer carries `catalogue_attributes`, `app.js:135-136` is simplified to `const facetTypes = (data.site && data.site.facet_types) || [];` — the build-derived list is authoritative. `standard` and `subject` remain facets because their definitions carry `facet: true`.
+Since the payload's `site` no longer carries `catalogue_attributes`, `app.js:135-136` is simplified to `const facetTypes = (data.site && data.site.facet_types) || [];` - the build-derived list is authoritative. `standard` and `subject` remain facets because their definitions carry `facet: true`.
 
 ## Risks / Trade-offs
 

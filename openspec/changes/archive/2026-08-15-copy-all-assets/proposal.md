@@ -2,7 +2,7 @@
 
 ## Why
 
-`build.py` copies static assets with an explicit per-file list. Every new file added under `theme/assets/` must be hand-added to that list or it silently never ships — which is already happening: the home template's navbar renders `assets/{{ site.logo }}` (`content/site.json` sets `site.logo = "logo_light.png"`), but the build never copies any logo, so the brand image is broken in the generated site. Copying the whole assets folder removes the list and this failure mode entirely.
+`build.py` copies static assets with an explicit per-file list. Every new file added under `theme/assets/` must be hand-added to that list or it silently never ships - which is already happening: the home template's navbar renders `assets/{{ site.logo }}` (`content/site.json` sets `site.logo = "logo_light.png"`), but the build never copies any logo, so the brand image is broken in the generated site. Copying the whole assets folder removes the list and this failure mode entirely.
 
 ## What Changes
 

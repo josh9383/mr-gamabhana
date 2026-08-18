@@ -1,6 +1,6 @@
 ## Context
 
-`build.py`'s `main()` ends by copying static assets into `site/assets/` with an explicit `shutil.copy` per file: `theme/style.css`, `theme/app.js`, and four files from `theme/assets/`. The `theme/assets/` folder currently holds eight files, four of which (`card-fallback.svg`, `logo_color.png`, `logo_dark.png`, `logo_light.png`) are never copied. One of those, `logo_light.png` (referenced by the home navbar as `assets/{{ site.logo }}` per `content/site.json`), is therefore missing from the generated site — a live defect. Every future asset added to `theme/assets/` silently suffers the same fate unless `build.py` is edited.
+`build.py`'s `main()` ends by copying static assets into `site/assets/` with an explicit `shutil.copy` per file: `theme/style.css`, `theme/app.js`, and four files from `theme/assets/`. The `theme/assets/` folder currently holds eight files, four of which (`card-fallback.svg`, `logo_color.png`, `logo_dark.png`, `logo_light.png`) are never copied. One of those, `logo_light.png` (referenced by the home navbar as `assets/{{ site.logo }}` per `content/site.json`), is therefore missing from the generated site - a live defect. Every future asset added to `theme/assets/` silently suffers the same fate unless `build.py` is edited.
 
 ## Goals / Non-Goals
 
@@ -22,8 +22,8 @@
 
 Replace the four `shutil.copy` calls for `theme/assets/*` with `shutil.copytree(THEME / "assets", SITE / "assets", dirs_exist_ok=True)`. The two `theme/style.css` and `theme/app.js` copies stay as explicit `shutil.copy` lines since they are outside the assets folder.
 
-- Alternative: a `for` loop over `glob("theme/assets/*")` calling `shutil.copy` — rejected: `copytree` is the standard idiom for "everything in this folder," handles nested content, and reads more clearly.
-- Alternative: keep the explicit list and add the four missing files — rejected: the goal is to eliminate the maintenance list, not extend it.
+- Alternative: a `for` loop over `glob("theme/assets/*")` calling `shutil.copy` - rejected: `copytree` is the standard idiom for "everything in this folder," handles nested content, and reads more clearly.
+- Alternative: keep the explicit list and add the four missing files - rejected: the goal is to eliminate the maintenance list, not extend it.
 
 Rationale: the build wipes `site/` at the start of `main()` (line 392), so the destination is always clean and `dirs_exist_ok=True` is safe. The output is a strict superset of the current output, so no existing page breaks.
 
@@ -31,7 +31,7 @@ Rationale: the build wipes `site/` at the start of `main()` (line 392), so the d
 
 `site/` is fully regenerated on every build, so a whole-folder copy cannot accumulate stale files. Any file the user drops into `theme/assets/` is intended to ship; shipping everything is the requested contract.
 
-- Alternative: copy with an allow/deny filter — rejected: reintroduces the maintenance list the change removes.
+- Alternative: copy with an allow/deny filter - rejected: reintroduces the maintenance list the change removes.
 
 ## Risks / Trade-offs
 

@@ -21,11 +21,11 @@ The previous iteration wrapped the search input, facets, and results inside a Bo
 
 **D1: Navbar search with icon and box.**
 The navbar gains the search input (input-group with a magnifier SVG) plus the autoSuggest container positioned under it. `#search-page` moves to the page body and becomes just the results column: `#result-count` + `#search-results`. This satisfies "results should continue on home page" and "move the search icon and search box in nav bar".
-- Alternative considered: keeping the search in the page body — rejected because the user asked for navbar placement.
+- Alternative considered: keeping the search in the page body - rejected because the user asked for navbar placement.
 
 **D2: Facets in a Bootstrap offcanvas drawer.**
 Facet panels move into `#facets-drawer` (`offcanvas offcanvas-end`), opened by a `#facets-toggle` button in the navbar via `data-bs-toggle="offcanvas"` (Bootstrap already bundled, so no new dependency). A "clear all" button sits at the top of the drawer body. The idea listing remains in the page body, visible while the drawer is open.
-- Alternative considered: Bootstrap Modal — rejected because a modal backdrop dims and covers the results the user wants to keep in view; offcanvas keeps them visible.
+- Alternative considered: Bootstrap Modal - rejected because a modal backdrop dims and covers the results the user wants to keep in view; offcanvas keeps them visible.
 
 **D3: Responsive facet access.**
 `#facets-toggle` gets `d-none d-md-block`; on mobile the navbar shows only the search box. Facet state still applies if shared via URL (the drawer simply stays closed on mobile).
@@ -35,7 +35,7 @@ Facet panels move into `#facets-drawer` (`offcanvas offcanvas-end`), opened by a
 
 **D5: Facets powered by vendored Tom Select.**
 Each facet panel renders a `<select multiple class="form-select facet-select">`; `initFacetSelects()` wraps each in a `TomSelect` instance (complete bundle, plugins `remove_button` + `clear_button`). Options are populated on every `renderFacets()` pass with the live counts as `addOption({value, text, count})`; the custom `render.option` shows `value (count)` while `render.item` shows just the value. A silent `setValue` on init restores URL state, and the `onChange` callback writes state back to the URL and re-renders. Tom Select 2.3.1 (Apache-2.0) is vendored at `theme/assets/tom-select.min.js` (complete build, plugins included) with the Bootstrap 5 theme `theme/assets/tom-select.bootstrap5.min.css`; `build.py` copies both to `site/assets/` (REQ-SO-007). The old pillbox renderer, its event listeners, and its CSS are removed.
-- Alternative considered: keeping the vanilla pillboxes — rejected because the user asked for Tom Select.
+- Alternative considered: keeping the vanilla pillboxes - rejected because the user asked for Tom Select.
 
 **D6: Autosuggest and URL round-trip carried over.**
 The debounced `miniSearch.autoSuggest`, outside-click/Escape close, and URL round-trip are retained with element references retargeted to the navbar input, drawer facets, and body results.

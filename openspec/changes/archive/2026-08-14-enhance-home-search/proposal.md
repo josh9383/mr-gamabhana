@@ -19,18 +19,18 @@ The first iteration hid the search input, facets, and results inside a collapsib
 - None.
 
 ### Modified Capabilities
-- `site-output`: Home page structure changes — search icon and search box in the navbar, a facet drawer, an always-visible idea listing in the page body, Font Awesome icons, and Tom Select assets copied to `site/assets/`.
+- `site-output`: Home page structure changes - search icon and search box in the navbar, a facet drawer, an always-visible idea listing in the page body, Font Awesome icons, and Tom Select assets copied to `site/assets/`.
 - `client-side-search`: Search and facets become filters over the default idea listing; facets render in a drawer and use Tom Select multi-select controls; autosuggest and URL round-trip interactions remain.
 
 ## Impact
 
 - **Files created/updated:**
-  - `templates/home.html.j2` — navbar search controls, offcanvas facet drawer, always-visible results area, Tom Select and Font Awesome asset links.
-  - `theme/app.js` — re-target search/facet wiring to the new layout; results render all ideas by default; facet controls driven by Tom Select.
-  - `theme/style.css` — navbar search, drawer layout, results-grid styles, Tom Select option counts; remove obsolete panel and pillbox styles.
-  - `theme/assets/tom-select.min.js`, `theme/assets/tom-select.bootstrap5.min.css` — vendored Tom Select 2.3.1 (Apache-2.0).
-  - `build.py` — copy the two Tom Select assets into `site/assets/`.
-  - `site/index.html` — regenerated output.
+  - `templates/home.html.j2` - navbar search controls, offcanvas facet drawer, always-visible results area, Tom Select and Font Awesome asset links.
+  - `theme/app.js` - re-target search/facet wiring to the new layout; results render all ideas by default; facet controls driven by Tom Select.
+  - `theme/style.css` - navbar search, drawer layout, results-grid styles, Tom Select option counts; remove obsolete panel and pillbox styles.
+  - `theme/assets/tom-select.min.js`, `theme/assets/tom-select.bootstrap5.min.css` - vendored Tom Select 2.3.1 (Apache-2.0).
+  - `build.py` - copy the two Tom Select assets into `site/assets/`.
+  - `site/index.html` - regenerated output.
 - **Unchanged:** `content/` (read-only), other templates.
 - **Dependencies:** Tom Select 2.3.1 vendored locally (no CDN at runtime); Bootstrap Offcanvas comes from the already-bundled `bootstrap.bundle.min.js`; MiniSearch already vendored; Font Awesome 6.7.2 via jsDelivr CDN.
 - **Constraints, Limitations, Assumptions:**

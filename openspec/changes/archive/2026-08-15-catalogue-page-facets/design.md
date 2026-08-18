@@ -29,7 +29,7 @@ The change makes individual catalogue pages (every `site/{path}/{slug}/index.htm
 
 The home search already implements every needed behaviour (counts, autosuggest, URL state, infinite scroll, reset). Individual pages reuse it via the same `#search-page` block. The page's scope is enforced by seeding `state[lockedFacet] = [lockedValue]`; all existing filter logic (`matchesFacets`, `filteredByOthers`) then composes it with the query and other facets automatically.
 
-- Alternatives considered: (a) extending `initCatalogueSearch` to add facets — rejected: the page's cards only carry a flat `data-search` string, so facet counts/filtering would require a bespoke per-page index; (b) a dedicated per-page JSON payload — rejected: `meta.json` already contains all ideas and is fetched once, and a per-page payload would duplicate data and cache paths.
+- Alternatives considered: (a) extending `initCatalogueSearch` to add facets - rejected: the page's cards only carry a flat `data-search` string, so facet counts/filtering would require a bespoke per-page index; (b) a dedicated per-page JSON payload - rejected: `meta.json` already contains all ideas and is fetched once, and a per-page payload would duplicate data and cache paths.
 
 ### D2. Locked facet is expressed by the build engine and read from the DOM
 
@@ -52,7 +52,7 @@ The navbar search input keeps `id="search-input"` on all pages, but the `catalog
 
 ### D5. Locked facet is excluded from URL write and reset, but overrides URL read
 
-- `readStateFromURL()` forces `state[lockedFacet] = lockedValues` after reading params (the page scope is authoritative — URL params cannot change it).
+- `readStateFromURL()` forces `state[lockedFacet] = lockedValues` after reading params (the page scope is authoritative - URL params cannot change it).
 - `writeStateToURL()` skips the locked facet (the page path already encodes it; writing it back would be redundant).
 - The reset handler skips the locked facet while clearing all others and the query.
 - `initFacetSelects()` skips groups with `data-locked="true"`; `renderFacets()` and `applyState()` already no-op when no Tom Select exists for a type.

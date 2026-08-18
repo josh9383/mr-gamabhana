@@ -24,7 +24,7 @@ The current search on the home page is a naive substring filter (`String.include
 
 ## Impact
 
-- **Build engine:** `build.py` — render `templates/search.html.j2` → `site/search.html`, copy `theme/assets/minisearch.min.js` → `site/assets/minisearch.min.js`, add the search URL to `site/sitemap.xml`.
+- **Build engine:** `build.py` - render `templates/search.html.j2` → `site/search.html`, copy `theme/assets/minisearch.min.js` → `site/assets/minisearch.min.js`, add the search URL to `site/sitemap.xml`.
 - **Templates:** create `templates/search.html.j2`; add a "शोध" link to the catalogue links in `templates/index.html.j2`.
 - **Theme:** create `theme/assets/minisearch.min.js` (vendored 7.2.0 UMD, global `MiniSearch`); add the search-page module to `theme/app.js`; add faceted-search layout styles to `theme/style.css`.
 - **Specs:** delta specs for `site-output` and `client-side-search`; main specs updated at archive time.

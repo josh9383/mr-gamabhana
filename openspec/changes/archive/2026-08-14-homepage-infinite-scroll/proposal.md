@@ -24,12 +24,12 @@ The home page currently renders every matching idea into the DOM at once. As the
 ## Impact
 
 - **Files created/updated:**
-  - `theme/app.js` — paginated rendering in `renderResults()`, `IntersectionObserver` on a sentinel, reset-on-filter-change, guard against in-flight loads and re-triggers.
-  - `templates/home.html.j2` — a static sentinel element (`#search-more`) after the results container that the observer watches.
-  - `theme/style.css` — sentinel, loading indicator, and end-of-list styles (no inline styles).
-  - `site/index.html` — regenerated output.
+  - `theme/app.js` - paginated rendering in `renderResults()`, `IntersectionObserver` on a sentinel, reset-on-filter-change, guard against in-flight loads and re-triggers.
+  - `templates/home.html.j2` - a static sentinel element (`#search-more`) after the results container that the observer watches.
+  - `theme/style.css` - sentinel, loading indicator, and end-of-list styles (no inline styles).
+  - `site/index.html` - regenerated output.
 - **Unchanged:** `build.py` (no build-engine changes), `content/` (read-only), `ideas.json` payload shape, catalogue pages, idea pages, and URL state semantics.
-- **Dependencies:** None new — `IntersectionObserver` is a browser API; no external libraries.
+- **Dependencies:** None new - `IntersectionObserver` is a browser API; no external libraries.
 - **Constraints, Limitations, Assumptions:**
   - Pagination applies only to the home page idea listing; catalogue pages and idea set pages keep their current single-pass behavior.
   - The page size is fixed at 6; not user-configurable.

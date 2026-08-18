@@ -28,15 +28,15 @@ Constraints: strictly vanilla stack, no inline styles/scripts, site artifacts se
 ### Decision: Render each card as an anchor carrying `card catalogue-card`
 The whole card is one link (image + title + description). An `<a>` has a transparent content model in HTML5, so `card-body`/`card-footer` block children inside it are valid. Making the card itself the anchor keeps the existing `.catalogue-card` selector used by `initCatalogueSearch()` and the `data-search` attribute in place, and lets the JS filter toggle `.card-hidden` on the same element.
 
-Alternative considered: `div.card` + `a.stretched-link` overlay — rejected because it splits the click target from the card element and would complicate the existing in-place filter.
+Alternative considered: `div.card` + `a.stretched-link` overlay - rejected because it splits the click target from the card element and would complicate the existing in-place filter.
 
 CSS: the hand-rolled `.catalogue-card` border/background/padding rules are removed (Bootstrap `.card` provides these). Only minimal overrides remain on `.catalogue-card`: `text-decoration: none`, `color: var(--bs-body-color)`, `height: 100%`, and a hover `border-color: var(--bs-primary)`. The old `.catalogue-card small` rule is removed.
 
-### Decision: Footer content is data-driven — props for idea cards, count for catalogue cards
+### Decision: Footer content is data-driven - props for idea cards, count for catalogue cards
 Idea card payloads already have `count: None` and no `props`; catalogue item payloads have `count` and no `props`. The build adds `props` and `prop_slugs` to idea card payloads (REQ-BE-011). The template branches: `{% if item.props %}` → props footer (small badge links to `/props/{slug}/`); `{% elif item.count is not none %}` → count footer (युक्त्या (N)); otherwise no footer. Home-page JS results always render the props footer from the extended store fields.
 
 ### Decision: Optional `image` field resolves to a root-relative `image_url`, with a bundled fallback asset
-`content/ideas/{id}/meta.json` gains an optional `image` field naming an image file inside the idea's content directory. When present, the build copies `content/ideas/{id}/{image}` into `site/ideas/{id}/` and sets `image_url = /ideas/{id}/{image}`. When missing or empty, `image_url = /assets/card-fallback.png` (REQ-BE-012). The template renders `<img class="card-img-top" src="{{ item.image_url }}" alt="{{ item.title }}">` — root-relative like other template URLs, staying self-contained under `base_url`.
+`content/ideas/{id}/meta.json` gains an optional `image` field naming an image file inside the idea's content directory. When present, the build copies `content/ideas/{id}/{image}` into `site/ideas/{id}/` and sets `image_url = /ideas/{id}/{image}`. When missing or empty, `image_url = /assets/card-fallback.png` (REQ-BE-012). The template renders `<img class="card-img-top" src="{{ item.image_url }}" alt="{{ item.title }}">` - root-relative like other template URLs, staying self-contained under `base_url`.
 
 A new static asset `theme/assets/card-fallback.png` (a neutral, minimal SVG, no inline scripts) is copied to `site/assets/` alongside the existing assets, extending the copy step in REQ-SO-007.
 

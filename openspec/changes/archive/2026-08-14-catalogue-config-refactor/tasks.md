@@ -1,6 +1,6 @@
 ## 1. Content configuration (content/site.json)
 
-- [x] 1.1 Replace the `catalogue_attributes` array with a `catalogues` object listing the same six active types (`categories`, `concepts`, `props`, `ideasets`, `standard`, `subject`), each with `path_name`, `title`, `description`, `field`, `mode`, and `facet` — `facet: true` for all except `ideasets` (REQ-CM-001, REQ-CM-005, REQ-BE-017).
+- [x] 1.1 Replace the `catalogue_attributes` array with a `catalogues` object listing the same six active types (`categories`, `concepts`, `props`, `ideasets`, `standard`, `subject`), each with `path_name`, `title`, `description`, `field`, `mode`, and `facet` - `facet: true` for all except `ideasets` (REQ-CM-001, REQ-CM-005, REQ-BE-017).
 - [x] 1.2 Confirm key order preserves the current facet order (categories, concepts, props, standard, subject) and all Marathi values match the old `CATALOGUE_DEFS` (REQ-CM-005).
 
 ## 2. Build engine (build.py)

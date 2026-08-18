@@ -24,21 +24,21 @@ A module-scoped `loadedPage` counter (0-based) and `const PAGE_SIZE = 6` sit alo
 
 **D2: Sentinel element observed by an `IntersectionObserver`.**
 `templates/home.html.j2` gains a static sentinel `<div id="search-more" aria-live="polite"></div>` right after `#search-results`. A single `IntersectionObserver` watches it; when it intersects the viewport, results remain, and no load is in progress, the next page is appended. The observer is unobserve()d at the end of the list.
-- Alternative considered: a `window` `scroll` listener with manual `getBoundingClientRect()` math — rejected because it needs rAF/throttle plumbing and can jank; `IntersectionObserver` is the standard, cheaper mechanism.
-- Alternative considered: a "load more" button — rejected because the user asked for scroll-triggered pagination.
+- Alternative considered: a `window` `scroll` listener with manual `getBoundingClientRect()` math - rejected because it needs rAF/throttle plumbing and can jank; `IntersectionObserver` is the standard, cheaper mechanism.
+- Alternative considered: a "load more" button - rejected because the user asked for scroll-triggered pagination.
 
 **D3: Reset to page 1 on every filter change.**
 The query input listener, the Tom Select `onChange`, `clear-facets`, `applySuggestion`, and `applyState` (URL restore) each call a shared `resetAndRender()` that sets `loadedPage = 0` and calls `render()`. `render()` itself never resets the page, so appending a page via the observer reuses the same `render()` without losing the scroll position.
 
 **D4: In-flight guard and graceful degradation.**
-A `loadingMore` flag guards the observer callback so re-entrant intersections cannot start a second page load. If `typeof IntersectionObserver === "undefined"` (ancient browsers), the listing falls back to rendering all results at once — the current behavior.
+A `loadingMore` flag guards the observer callback so re-entrant intersections cannot start a second page load. If `typeof IntersectionObserver === "undefined"` (ancient browsers), the listing falls back to rendering all results at once - the current behavior.
 
 **D5: Card markup is extracted.**
 The card template literal currently inside `renderResults()` moves to a `cardHtml(idea)` function used by both the initial render and page appends, so every page renders identically.
-- Alternative considered: appending only the new slice via `insertAdjacentHTML` — rejected for this scale because a deterministic full re-render of the slice is simpler and avoids partial-update bugs; if the catalog grows large, appending can be revisited.
+- Alternative considered: appending only the new slice via `insertAdjacentHTML` - rejected for this scale because a deterministic full re-render of the slice is simpler and avoids partial-update bugs; if the catalog grows large, appending can be revisited.
 
 **D6: Sentinel communicates end-of-list.**
-The sentinel renders a muted end-of-list line (`सर्व युक्त्या पाहिल्या` — "all ideas seen") once every matching idea is loaded, and stays clear otherwise. `aria-live="polite"` announces loading progress to assistive technology.
+The sentinel renders a muted end-of-list line (`सर्व युक्त्या पाहिल्या` - "all ideas seen") once every matching idea is loaded, and stays clear otherwise. `aria-live="polite"` announces loading progress to assistive technology.
 
 ## Risks / Trade-offs
 

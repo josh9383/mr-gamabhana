@@ -1,4 +1,4 @@
-# Gamabhana — Single-language static content site
+# Gamabhana - Single-language static content site
 
 One repository represents one language.
 

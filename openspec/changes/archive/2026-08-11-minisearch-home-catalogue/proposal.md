@@ -23,7 +23,7 @@ The MiniSearch faceted-search experience on `search.html` has been validated and
 
 - **Build engine (`build.py`):** render `templates/home.html.j2` → `site/index.html`; stop rendering `search.html`; drop the search URL from `site/sitemap.xml`; delete the obsolete `search.html.j2` template reference.
 - **Templates:** rename `search.html.j2` → `home.html.j2` (canonical `/`, keep search layout); delete `index.html.j2`; add `<script src=".../assets/minisearch.min.js">` to `catalogue.html.j2`.
-- **Theme:** `theme/app.js` — delete `initHome`, `renderHomeGroup`, `filterCards`, and the `#search` branch; rewrite `initCatalogueSearch` to index the page's cards with MiniSearch (prefix + fuzzy, `?tag=` support, substring fallback); `theme/style.css` unchanged (styles already cover the layout).
+- **Theme:** `theme/app.js` - delete `initHome`, `renderHomeGroup`, `filterCards`, and the `#search` branch; rewrite `initCatalogueSearch` to index the page's cards with MiniSearch (prefix + fuzzy, `?tag=` support, substring fallback); `theme/style.css` unchanged (styles already cover the layout).
 - **Specs:** delta specs for `site-output` and `client-side-search`; main specs updated at archive.
 - **Docs:** `README.md` describes the home search page and MiniSearch catalogue filtering.
 - **Out of scope:** no changes to `content/`; no new libraries (MiniSearch 7.2.0 already vendored); no server-side search.

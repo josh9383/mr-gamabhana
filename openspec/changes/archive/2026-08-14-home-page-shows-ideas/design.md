@@ -56,7 +56,7 @@ def home_idea_items(ideas):
     ]
 ```
 
-The `ideasets` array is dropped because nothing consumes it after this change (`app.js` is updated in the same change and catalogue pages never read `ideas.json`). Alternative considered: keeping both arrays in the payload — rejected as dead weight and it would leave the client open to regressing to the old behavior.
+The `ideasets` array is dropped because nothing consumes it after this change (`app.js` is updated in the same change and catalogue pages never read `ideas.json`). Alternative considered: keeping both arrays in the payload - rejected as dead weight and it would leave the client open to regressing to the old behavior.
 
 ### D2. Client search switches from idea sets to ideas
 
@@ -67,11 +67,11 @@ In `initSearchPage()` of `theme/app.js`:
 - MiniSearch fields: `["title", "description", "board", "standard", "subject", "categories", "concepts", "props", "ideasets"]` with `title` boosted; `storeFields: ["id", "title", "description", "url", "props", "prop_slugs", "image_urls"]`.
 - `matchesFacets`, `filteredByOthers`, `renderFacets`, `currentResults`, and URL-state code are mechanically changed from `ideasets`/`set` to `ideas`/`idea`; the `standard`/`subject` scalar handling in `facetValues` is the only semantic change.
 
-Alternative considered: adding an `ideasets` facet now that ideas are the search subject — rejected to keep this change focused; the data is present in the payload so it can be added later.
+Alternative considered: adding an `ideasets` facet now that ideas are the search subject - rejected to keep this change focused; the data is present in the payload so it can be added later.
 
 ### D3. Home result cards render idea images in order
 
-`imageCapHtml(idea)` renders the idea's own `image_urls` in source order: fallback when empty, single `<img>` when one, otherwise a `card-carousel` capped at six — exactly the card anatomy the catalogue templates already use for idea cards. No Fisher–Yates shuffle (that was idea-set-specific `REQ-CS-010`, now removed); the unused `shuffle()` helper is deleted.
+`imageCapHtml(idea)` renders the idea's own `image_urls` in source order: fallback when empty, single `<img>` when one, otherwise a `card-carousel` capped at six - exactly the card anatomy the catalogue templates already use for idea cards. No Fisher–Yates shuffle (that was idea-set-specific `REQ-CS-010`, now removed); the unused `shuffle()` helper is deleted.
 
 The card footer shows prop badges only when `props` is an active catalogue, mirroring `templates/catalogue.html.j2`; there is no member-count footer because ideas are not sets. The result-count label becomes `{n} युक्त्या` and the empty state "कोणतीही युक्ती सापडली नाही".
 

@@ -1,6 +1,6 @@
 ## Context
 
-The `catalogues` node in `content/site.json` now fully drives catalogue page generation and the home facet list (`facet` flag). Two placement decisions remain hardcoded. First, the navbar (rendered identically in `home.html.j2`, `catalogue.html.j2`, `idea.html.j2`, and `ideaset.html.j2`) shows only the brand (plus the home search box and facets toggle); it has no catalogue links. Second, idea card footers are hardcoded to props: server-rendered cards (`templates/catalogue.html.j2`) show props badges only when `"props" in catalogue_attributes`, and home cards (`cardHtml` in `theme/app.js`) show props badges only when `facetTypes.includes("props")`. `build.py` builds idea card payloads in two places — `idea_card()` (server cards) and `home_idea_items()` (client payload) — and each currently carries only `props`/`prop_slugs` for the footer.
+The `catalogues` node in `content/site.json` now fully drives catalogue page generation and the home facet list (`facet` flag). Two placement decisions remain hardcoded. First, the navbar (rendered identically in `home.html.j2`, `catalogue.html.j2`, `idea.html.j2`, and `ideaset.html.j2`) shows only the brand (plus the home search box and facets toggle); it has no catalogue links. Second, idea card footers are hardcoded to props: server-rendered cards (`templates/catalogue.html.j2`) show props badges only when `"props" in catalogue_attributes`, and home cards (`cardHtml` in `theme/app.js`) show props badges only when `facetTypes.includes("props")`. `build.py` builds idea card payloads in two places - `idea_card()` (server cards) and `home_idea_items()` (client payload) - and each currently carries only `props`/`prop_slugs` for the footer.
 
 ## Goals / Non-Goals
 
@@ -14,21 +14,21 @@ The `catalogues` node in `content/site.json` now fully drives catalogue page gen
 **Non-Goals:**
 - No changes to idea detail page badges (`idea.html.j2` header badge list).
 - No changes to catalogue page generation, facet behavior, URL state, or the top-level payload shape.
-- No changes to `content/` — the existing `content/site.json` stays valid because the new flags default to true.
+- No changes to `content/` - the existing `content/site.json` stays valid because the new flags default to true.
 - No new catalogue types or per-idea `meta.json` changes.
 
 ## Decisions
 
 **D1: `menu` and `footer` definition attributes (default true).**
 Each `catalogues` definition gains `menu` and `footer` booleans. `load_catalogue_defs(site)` normalizes every entry with `{"facet": True, "menu": True, "footer": True, **entry}`, so omitted flags default to true for both configured definitions and the `DEFAULT_CATALOGUES` fallback set. `DEFAULT_CATALOGUES` entries get explicit `menu`/`footer` too. This keeps `content/site.json` unchanged while enabling per-type opt-out.
-- Alternative considered: a separate top-level `navbar`/`footers` array in `site.json` — rejected because the per-definition flags keep a single source of truth alongside `facet`.
+- Alternative considered: a separate top-level `navbar`/`footers` array in `site.json` - rejected because the per-definition flags keep a single source of truth alongside `facet`.
 
 **D2: Navbar menu derived from the definitions.**
 `menu_groups = [(key, title, path_name) for key in active_types if catalogue_defs[key]["menu"]]` is added to `base_context`, so every template renders the same navbar. Each navbar inserts a compact `navbar-nav flex-row flex-wrap gap-2` list of nav links after the brand; the home page's search keeps its `ms-auto`. Each link is `<a class="nav-link" href="{base_url}/{path_name}/">{title}</a>`.
 
 **D3: Footer badges precomputed by the build.**
 `footer_types = [key for key in active_types if catalogue_defs[key]["footer"]]`. A helper `footer_badges_for(idea, catalogue_defs, footer_types)` returns `[{"value": ..., "url": ...}]`: for `single` mode it uses `idea[field]` and the `{key}_slug` slug (e.g., `board_slug`, `standard_slug`, `subject_slug`); for `multi` mode it zips `idea[field]` with `{key}_slugs` (e.g., `category_slugs`, `ideaset_slugs`). URLs are `/{path_name}/{slug}/`. `idea_card()` and `home_idea_items()` both add `footer_badges`. This keeps the Jinja template and `app.js` free of per-type mode/slug logic and makes the client payload self-describing.
-- Alternative considered: passing per-type accessors or `mode`/`path_name` maps into templates and JS — rejected because precomputed badges are uniform and simpler to render and test.
+- Alternative considered: passing per-type accessors or `mode`/`path_name` maps into templates and JS - rejected because precomputed badges are uniform and simpler to render and test.
 
 **D4: Template idea-card footer (catalogue.html.j2).**
 Idea cards (`item.count is none`) render a `card-footer` of `item.footer_badges` badges (class `text-bg-light text-decoration-none`, same as today's props badges); landing-page cards keep the count footer. The `"props" in catalogue_attributes` branch is replaced by the generic `footer_badges` loop. The ideas landing page (`site/ideas/index.html`) uses the same template and gets the same badges automatically.

@@ -12,7 +12,7 @@
 
 ## 3. Template and styles
 
-- [x] 3.1 Create `templates/search.html.j2`: site header, search input, six facet panel containers, results container, and `site/assets/minisearch.min.js` + `site/assets/app.js` script tags — all via `base_url`, no inline scripts/styles
+- [x] 3.1 Create `templates/search.html.j2`: site header, search input, six facet panel containers, results container, and `site/assets/minisearch.min.js` + `site/assets/app.js` script tags - all via `base_url`, no inline scripts/styles
 - [x] 3.2 Add a "शोध" link to the search page in the catalogue links of `templates/index.html.j2`
 - [x] 3.3 Add faceted-search layout styles to `theme/style.css` (facet panels, checkbox rows with counts, result cards, result-count line, clear-all button, responsive two-column layout)
 

@@ -4,7 +4,7 @@ Search only matches Devanagari today: a visitor who cannot type Devanagari (no I
 
 ## What Changes
 
-- Both search inputs — the home `#search-input` and the catalogue `.catalogue-search` — gain the shared class `phonetic-input`.
+- Both search inputs - the home `#search-input` and the catalogue `.catalogue-search` - gain the shared class `phonetic-input`.
 - `templates/home.html.j2` and `templates/catalogue.html.j2` include the gamabhana widget launcher as a parse-time script tag:
   `https://www.gamabhana.com/gamabhanaWidget/add/?mode=custom&c=phonetic-input&lang=0`
   The widget converts keystrokes in `phonetic-input` elements to Devanagari as-you-type (verified live over HTTPS) and renders a small gamabhana branding bar.
@@ -20,8 +20,8 @@ Search only matches Devanagari today: a visitor who cannot type Devanagari (no I
 
 ### Modified Capabilities
 
-- `site-output`: Modify REQ-SO-009 (extend the external-URL exception to include the gamabhana widget script) and add REQ-SO-012 (phonetic search input — search inputs carry the `phonetic-input` class and search pages include the gamabhana widget launcher).
-- `client-side-search`: Add REQ-CS-009 (phonetic transliteration fallback — the client script transliterates Roman queries to Devanagari at query time so searches typed in Roman still match Devanagari content, even when the widget is unavailable).
+- `site-output`: Modify REQ-SO-009 (extend the external-URL exception to include the gamabhana widget script) and add REQ-SO-012 (phonetic search input - search inputs carry the `phonetic-input` class and search pages include the gamabhana widget launcher).
+- `client-side-search`: Add REQ-CS-009 (phonetic transliteration fallback - the client script transliterates Roman queries to Devanagari at query time so searches typed in Roman still match Devanagari content, even when the widget is unavailable).
 
 ## Impact
 

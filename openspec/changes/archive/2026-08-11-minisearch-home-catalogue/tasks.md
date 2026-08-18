@@ -25,4 +25,4 @@
 ## 5. Build and verify
 
 - [x] 5.1 Rebuild and verify generated home page + all catalogue pages reference `assets/minisearch.min.js`; `site/search.html` absent; sitemap URL count drops by one
-- [x] 5.2 Headless verification against `site/` data: home search logic (Devanagari prefix/fuzzy + facet composition) and catalogue card-index logic (build index from card search text, prefix/fuzzy match, fallback path) — mirroring the shipped `app.js` functions
+- [x] 5.2 Headless verification against `site/` data: home search logic (Devanagari prefix/fuzzy + facet composition) and catalogue card-index logic (build index from card search text, prefix/fuzzy match, fallback path) - mirroring the shipped `app.js` functions

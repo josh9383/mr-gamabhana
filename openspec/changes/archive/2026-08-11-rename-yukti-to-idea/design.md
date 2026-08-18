@@ -16,7 +16,7 @@ content/ideas.json ──> build.py (loads "ideas" key) ──> templates/idea.h
 
 **Non-Goals:**
 - No change to any Marathi display literal (`युक्त्या`, `...नुसार युक्त्या`, etc.).
-- No change to yukti `id` values (`angles`, `triangles`) — they contain no `yukti` token.
+- No change to yukti `id` values (`angles`, `triangles`) - they contain no `yukti` token.
 - No change to `.github/workflows/pages.yml` or `requirements.txt` (no `yukti` references).
 - No change to the archived baseline change.
 - No behavioural/SEO logic changes; the `/yuktis/` → `/ideas/` URL path change is the sole breaking effect.
@@ -27,20 +27,20 @@ content/ideas.json ──> build.py (loads "ideas" key) ──> templates/idea.h
 `content/yuktis.json` → `content/ideas.json`, directory `content/yuktis/` → `content/ideas/`, and the JSON key `"yuktis"` → `"ideas"`. `build.py` reads `data["ideas"]`.
 
 *Rationale:* A half-rename (code renames but data keeps old names) would leave the single source of truth permanently inconsistent with the rest of the system and confuse future edits. The user explicitly requested the rename include content files.
-*Alternative considered:* Keep `content/` as-is and map old names in `build.py` — rejected: perpetuates the inconsistency and complicates every future change.
+*Alternative considered:* Keep `content/` as-is and map old names in `build.py` - rejected: perpetuates the inconsistency and complicates every future change.
 
 ### D2: Rename identifiers mechanically, one token mapping
 Apply a strict token mapping in each file:
 `yukti` → `idea`, `yuktis` → `ideas` (longest match first to avoid partial matches), including: Python identifiers (`yuktis`, `yukti_index`, `yukti_items`, `load_yukti_content`, loop vars), template/CSS class names (`.yukti-header` → `.idea-header`, `.yukti-content` → `.idea-content`, `.page.yukti` → `.page.idea`), element id `yukti-list` → `idea-list`, JS `data.yuktis` → `data.ideas`, file names, directory names, URL segments, and the JSON payload key.
 
 *Rationale:* A single deterministic mapping avoids missed or inconsistent references and makes the rename verifiable by a repo-wide grep.
-*Alternative considered:* Renaming only user-facing strings (URLs/labels) and keeping internal identifiers — rejected: the user asked for tokens everywhere, and internal consistency is the point of the change.
+*Alternative considered:* Renaming only user-facing strings (URLs/labels) and keeping internal identifiers - rejected: the user asked for tokens everywhere, and internal consistency is the point of the change.
 
 ### D3: Keep Marathi literals as an explicit exception to the mapping
 The strings `युक्त्या` and `...नुसार युक्त्या` are Marathi words, not the English token `yukti`, and SHALL NOT be replaced. The mapping applies only to ASCII `yukti`/`yuktis` tokens.
 
 *Rationale:* The site is Marathi-language; the display label is a deliberate Marathi word. Changing it would alter the product's UI text, which the user explicitly excluded.
-*Alternative considered:* Translating `युक्त्या` to `कल्पनासंग्रह` — rejected by user.
+*Alternative considered:* Translating `युक्त्या` to `कल्पनासंग्रह` - rejected by user.
 
 ### D4: Rename template files and update all references atomically
 `templates/yukti.html.j2` → `templates/idea.html.j2`, `templates/yukti.md.j2` → `templates/idea.md.j2`, and update `build.py`'s `env.get_template(...)` calls in the same step. The `index.html.j2` and `catalogue.html.j2` templates are not renamed but their `yukti`/`yuktis` tokens are updated.
@@ -68,4 +68,4 @@ The strings `युक्त्या` and `...नुसार युक्त�
 
 ## Open Questions
 
-None — scope confirmed by the user (rename tokens only, keep Marathi literals).
+None - scope confirmed by the user (rename tokens only, keep Marathi literals).

@@ -37,5 +37,5 @@
 
 - [x] 6.1 Run `python build.py` and confirm the site builds under `site/ideas/` with no errors
 - [x] 6.2 Verify generated `site/`: `/ideas/` URLs, `index.json` `"ideas"` key, canonical URLs, and sitemap all use `ideas`
-- [x] 6.3 Run a repo-wide grep for `yukti` (case-insensitive) — the only remaining matches SHALL be in the archived change and Marathi literals
+- [x] 6.3 Run a repo-wide grep for `yukti` (case-insensitive) - the only remaining matches SHALL be in the archived change and Marathi literals
 - [x] 6.4 Confirm Marathi literals (`युक्त्या` etc.) are byte-identical in `templates/`, `theme/app.js`, and `build.py`

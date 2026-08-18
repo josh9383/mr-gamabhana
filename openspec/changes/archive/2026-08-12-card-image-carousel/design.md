@@ -31,14 +31,14 @@ For each entry in `images`, the build copies `content/ideas/{id}/{image}` to `si
 ### Decision: Pure-CSS crossfade carousel using per-count classes and keyframes
 No inline styles are allowed, so the cycle is driven by static CSS. Each card cap container uses:
 
-- `.card-carousel` — `position: relative`, `aspect-ratio: 16/9`, `overflow: hidden`; images are absolutely positioned, `inset: 0`, `width/height: 100%`, `object-fit: cover`, starting at `opacity: 0`.
+- `.card-carousel` - `position: relative`, `aspect-ratio: 16/9`, `overflow: hidden`; images are absolutely positioned, `inset: 0`, `width/height: 100%`, `object-fit: cover`, starting at `opacity: 0`.
 - Per-count keyframes `card-carousel-fade-2` … `card-carousel-fade-6` where each image is fully opaque for exactly one `100/N` slot with a ~0.4 s fade on each side.
 - Per-count modifier classes `.card-carousel--N` setting `animation-duration: N * 3s` on the images and a staggered `animation-delay: (i-1) * 3s` per `:nth-child(i)`.
 
 The template/JS emits `<div class="card-carousel card-carousel--N">` with one `<img>` per image. This needs no inline styles and no script; the cycle is pure CSS. Up to 6 images are cycled; if an idea lists more, only the first 6 are rendered (documented limit).
 
 ### Decision: Uniform 16:9 image caps with `object-fit: cover`
-All image caps — single, carousel, and fallback — render at `aspect-ratio: 16/9` with `object-fit: cover` (the fallback SVG is already 16:9, so it is unaffected). This avoids layout shift when the first image loads and keeps every card in a row the same height. Alternative (natural aspect per image) rejected because mixed aspect ratios would misalign cards and cause layout jump.
+All image caps - single, carousel, and fallback - render at `aspect-ratio: 16/9` with `object-fit: cover` (the fallback SVG is already 16:9, so it is unaffected). This avoids layout shift when the first image loads and keeps every card in a row the same height. Alternative (natural aspect per image) rejected because mixed aspect ratios would misalign cards and cause layout jump.
 
 ### Decision: Respect `prefers-reduced-motion`
 A `@media (prefers-reduced-motion: reduce)` block disables the cycling animation, so the first image of a multi-image cap is shown statically. This keeps the decoration accessible without any script.

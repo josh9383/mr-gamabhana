@@ -22,7 +22,7 @@ Every generated artifact SHALL be entirely self-contained with no shared runtime
 ## ADDED Requirements
 
 ### Requirement: [REQ-SO-012: Phonetic search input]
-The build SHALL render both search inputs — the home page's `#search-input` and the catalogue pages' `.catalogue-search` — with the shared class `phonetic-input`. Home and catalogue pages SHALL include the gamabhana widget launcher script (`https://www.gamabhana.com/gamabhanaWidget/add/?mode=custom&c=phonetic-input&lang=0`) as a parse-time script tag in the body, so the widget converts Roman keystrokes into Devanagari in those inputs.
+The build SHALL render both search inputs - the home page's `#search-input` and the catalogue pages' `.catalogue-search` - with the shared class `phonetic-input`. Home and catalogue pages SHALL include the gamabhana widget launcher script (`https://www.gamabhana.com/gamabhanaWidget/add/?mode=custom&c=phonetic-input&lang=0`) as a parse-time script tag in the body, so the widget converts Roman keystrokes into Devanagari in those inputs.
 
 #### Scenario: Widget launcher on search pages
 - **WHEN** the home page or any catalogue page is generated

@@ -30,14 +30,14 @@ Client-side search runs in `theme/app.js` (initSearchPage / initCatalogueSearch)
 - script: `https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js`
 The resolved values are merged into the `site` dict and every template accesses them via `{{ site.theme_stylesheet }}` / `{{ site.bootstrap_script }}`.
 Rationale: user's explicit requirement ("specify stylesheet link in full"), trivially reversible, no build restructure.
-Alternatives: vendoring each theme into `theme/` (rejected — defeats the "switch by link" requirement); a short theme name + lookup table (rejected — user wants full links).
+Alternatives: vendoring each theme into `theme/` (rejected - defeats the "switch by link" requirement); a short theme name + lookup table (rejected - user wants full links).
 
 **D2. Theme link injection order and placement.**
 `<head>`: theme stylesheet `<link>` first, then local `site/assets/style.css` so site rules override theme/Bootstrap defaults. Before `</body>`: Bootstrap JS bundle `<script>` then `assets/app.js`. No inline styles or inline scripts anywhere.
 Rationale: local CSS must win for app.js-dependent selectors; app.js must run after the DOM it binds.
 
 **D3. Preserve the exact app.js selector contract.**
-Templates keep these hooks unchanged: `#search-page`, `#search-input`, `#search-results`, `#result-count`, `#clear-facets`, `.facets`, `.facet[data-facet=…]`, `.facet-items`, `.catalogue-grid`, `.catalogue-card`, `.catalogue-search`, `.card-hidden`. app.js injects `.facet-item` labels and `.catalogue-card` anchors with template literals — Bootstrap classes are added only in the templates, and `theme/style.css` restyles the injected elements using `var(--bs-*)` so they look native.
+Templates keep these hooks unchanged: `#search-page`, `#search-input`, `#search-results`, `#result-count`, `#clear-facets`, `.facets`, `.facet[data-facet=…]`, `.facet-items`, `.catalogue-grid`, `.catalogue-card`, `.catalogue-search`, `.card-hidden`. app.js injects `.facet-item` labels and `.catalogue-card` anchors with template literals - Bootstrap classes are added only in the templates, and `theme/style.css` restyles the injected elements using `var(--bs-*)` so they look native.
 Rationale: guarantees zero functional regression in search/facets.
 
 **D4. Bootstrap component mapping per template.**
@@ -50,7 +50,7 @@ Rationale: guarantees zero functional regression in search/facets.
 - Facet heading text uses Bootstrap heading utilities.
 
 **D5. `theme/style.css` rework on top of Bootstrap variables.**
-Remove hand-rolled layout (body margins, header bar, page width, buttons). Keep only app.js-dependent rules: `.catalogue-card`, `.facet-item`, `.card-hidden`, `.catalogue-grid` (grid fallback), `.no-results`, `.facet h3`, `.facet-actions` — all expressed with `var(--bs-*)` (e.g., `--bs-border-color`, `--bs-body-bg`, `--bs-link-color`, `--bs-body-color`) so the look follows the active theme automatically.
+Remove hand-rolled layout (body margins, header bar, page width, buttons). Keep only app.js-dependent rules: `.catalogue-card`, `.facet-item`, `.card-hidden`, `.catalogue-grid` (grid fallback), `.no-results`, `.facet h3`, `.facet-actions` - all expressed with `var(--bs-*)` (e.g., `--bs-border-color`, `--bs-body-bg`, `--bs-link-color`, `--bs-body-color`) so the look follows the active theme automatically.
 Rationale: single visual source of truth becomes the theme stylesheet; local CSS only supplies the layout glue the JS needs.
 
 **D6. REQ-SO-009 self-containment exception.**
@@ -70,4 +70,4 @@ No content migration. The build defaults to Vapor, so existing `content/site.jso
 
 ## Open Questions
 
-None blocking. Minor: whether Bootstrap JS is needed on idea pages (no interactive components there) — decision: include everywhere for consistency and future-proofing, per D2.
+None blocking. Minor: whether Bootstrap JS is needed on idea pages (no interactive components there) - decision: include everywhere for consistency and future-proofing, per D2.

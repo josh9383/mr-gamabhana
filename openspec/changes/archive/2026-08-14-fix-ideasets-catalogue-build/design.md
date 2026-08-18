@@ -52,7 +52,7 @@ def ideaset_catalogue_items(ideasets):
     ]
 ```
 
-`url` comes from the idea set's `url` field (custom slug), `count` from `member_count`, and `image_urls` from the representative images so the landing cards get an image cap. `props` stays empty so the card footer falls through to the count footer (the same behaviour as other landing pages). Alternative considered: reusing `catalogue_items()` over each idea's `ideasets` array — rejected because it produces URLs from `make_slug(title)` that mismatch custom slugs and loses the member count semantics.
+`url` comes from the idea set's `url` field (custom slug), `count` from `member_count`, and `image_urls` from the representative images so the landing cards get an image cap. `props` stays empty so the card footer falls through to the count footer (the same behaviour as other landing pages). Alternative considered: reusing `catalogue_items()` over each idea's `ideasets` array - rejected because it produces URLs from `make_slug(title)` that mismatch custom slugs and loses the member count semantics.
 
 ### D2. Ideasets is a landing-only catalogue
 
@@ -62,7 +62,7 @@ In `main()`, after building `catalogues`, treat `ideasets` specially in both loo
 - In the landing/item loop, always write the landing page (`site/ideasets/index.html` from `catalogue.html.j2`), then `continue` before the per-item loop when `key == "ideasets"`.
 - The landing `mkdir` uses `exist_ok=True` because `site/ideasets/` already exists from the idea-set page pass; this is harmless since `site/` is wiped at the start of every build and is in fact the exact original crash site (`FileExistsError` on `site\ideasets`).
 
-The per-item pages already exist as dedicated idea set pages; skipping them prevents overwriting the accordion pages with the catalogue template. Alternative considered: passing `exist_ok=True` to the per-item `mkdir` — rejected because it merely papers over the crash and then clobbers the idea set pages with the wrong template.
+The per-item pages already exist as dedicated idea set pages; skipping them prevents overwriting the accordion pages with the catalogue template. Alternative considered: passing `exist_ok=True` to the per-item `mkdir` - rejected because it merely papers over the crash and then clobbers the idea set pages with the wrong template.
 
 ### D3. Single facet-type source omits ideasets
 
@@ -74,7 +74,7 @@ facet_groups = [(key, CATALOGUE_DEFS[key][1]) for key in active_types if key != 
 site["facet_types"] = facet_types
 ```
 
-`site["facet_types"]` is embedded in `site/ideas.json`, and `theme/app.js` switches from `[...catalogueAttributes, "standard", "subject"]` to `data.site.facet_types` (with the old expression as a fallback for missing data). This keeps one source of truth in the build and keeps URL state, panel rendering, and filtering consistent. An idea set cannot facet on itself, so `ideasets` is excluded from facets while still being a catalogue. Alternative considered: hardcoding the exclusion in `app.js` — rejected because it splits the source of truth across two files.
+`site["facet_types"]` is embedded in `site/ideas.json`, and `theme/app.js` switches from `[...catalogueAttributes, "standard", "subject"]` to `data.site.facet_types` (with the old expression as a fallback for missing data). This keeps one source of truth in the build and keeps URL state, panel rendering, and filtering consistent. An idea set cannot facet on itself, so `ideasets` is excluded from facets while still being a catalogue. Alternative considered: hardcoding the exclusion in `app.js` - rejected because it splits the source of truth across two files.
 
 ### D4. Sitemap emits idea set URLs once
 

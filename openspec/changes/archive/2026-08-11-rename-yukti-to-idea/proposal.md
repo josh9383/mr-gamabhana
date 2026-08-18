@@ -20,10 +20,10 @@ None.
 
 ### Modified Capabilities
 
-- `content-model`: Terminology and file references updated — `content/yuktis.json` → `content/ideas.json`, the `yuktis` array → `ideas`, `yukti` → `idea` in REQ-CM-001, REQ-CM-002, REQ-CM-003. REQ-CM-004 is unchanged.
+- `content-model`: Terminology and file references updated - `content/yuktis.json` → `content/ideas.json`, the `yuktis` array → `ideas`, `yukti` → `idea` in REQ-CM-001, REQ-CM-002, REQ-CM-003. REQ-CM-004 is unchanged.
 - `build-engine`: Terminology and references updated in REQ-BE-001, REQ-BE-003, REQ-BE-004, REQ-BE-005 (`yuktis.json`, `yuktis/`, `yukti page`, `templates/yukti.html.j2` → `idea.html.j2`). REQ-BE-002/006/007 are unchanged.
-- `site-output`: Output paths and terminology updated — `site/yuktis/` → `site/ideas/`, `/yuktis/` → `/ideas/`, `yukti` → `idea` in REQ-SO-002, REQ-SO-004, REQ-SO-005, REQ-SO-006, REQ-SO-008. REQ-SO-001/003/007/009 are unchanged.
-- `client-side-search`: Terminology updated — `yukti list` → `idea list`, `yuktis` → `ideas` in REQ-CS-001, REQ-CS-002. REQ-CS-003/004/005 are unchanged.
+- `site-output`: Output paths and terminology updated - `site/yuktis/` → `site/ideas/`, `/yuktis/` → `/ideas/`, `yukti` → `idea` in REQ-SO-002, REQ-SO-004, REQ-SO-005, REQ-SO-006, REQ-SO-008. REQ-SO-001/003/007/009 are unchanged.
+- `client-side-search`: Terminology updated - `yukti list` → `idea list`, `yuktis` → `ideas` in REQ-CS-001, REQ-CS-002. REQ-CS-003/004/005 are unchanged.
 
 ## Impact
 
@@ -40,7 +40,7 @@ None.
   - Specs: `openspec/specs/{content-model,build-engine,site-output,client-side-search}/spec.md`
 - **Files created**: change artifacts under `openspec/changes/rename-yukti-to-idea/` (proposal, delta specs, design, tasks).
 - **Regenerated**: `site/` output (already gitignored, rebuilt by CI).
-- **Not touched**: `.github/workflows/pages.yml`, `requirements.txt`, archived change `2026-08-11-establish-project-baseline`, Marathi literals, yukti `id` values (`angles`, `triangles` — they contain no `yukti` token).
+- **Not touched**: `.github/workflows/pages.yml`, `requirements.txt`, archived change `2026-08-11-establish-project-baseline`, Marathi literals, yukti `id` values (`angles`, `triangles` - they contain no `yukti` token).
 
 ### Constraints, Assumptions, Out-of-Scope
 

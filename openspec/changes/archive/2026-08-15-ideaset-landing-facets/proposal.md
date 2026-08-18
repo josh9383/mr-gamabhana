@@ -6,7 +6,7 @@ The ideasets landing page (`/ideasets/`) lists idea sets as static cards with on
 
 - The ideasets landing page (`site/ideasets/index.html`) gains the home-page search + facets experience: search input, facet panels with live counts, autosuggest, URL-shareable state, infinite scroll, and a reset button.
 - The search operates over the idea sets themselves, using each idea set's aggregated metadata (its members' standards, subjects, categories, concepts, and props) as facet values.
-- **No "ideasets" (युक्तीसंच) facet panel is rendered on this page** — the page is already the ideasets catalogue, so the facet for the ideaset type is omitted entirely; the remaining facets are interactive.
+- **No "ideasets" (युक्तीसंच) facet panel is rendered on this page** - the page is already the ideasets catalogue, so the facet for the ideaset type is omitted entirely; the remaining facets are interactive.
 - Idea set cards keep their existing look (representative images, title, description, member count in the footer).
 - The client index in `site/meta.json` gains the aggregated facet fields (and an `id`) for each idea set so the page can be driven by the existing `initPage()` search engine generalized to an "ideaset index" mode.
 - The client derives the active facet types from the rendered facet panels (single source of truth), so the page's facet set is controlled by what the template renders.
@@ -26,10 +26,10 @@ The ideasets landing page (`/ideasets/`) lists idea sets as static cards with on
 
 Files created or updated:
 
-- `build.py` — enrich `ideaset_catalogue_items` with `id` and aggregated facet fields; render the ideasets landing page with `search_index="ideasets"` and `facet_groups` excluding `ideasets`.
-- `templates/catalogue.html.j2` — render the search experience block when `search_index` is set (facet panels from the passed `facet_groups`, `#search-page` with `data-index="ideasets"`), and keep the landing card grid otherwise.
-- `theme/app.js` — generalize `initPage()`: item source by `data-index` (`ideas` vs `catalogues.ideasets`), aggregated facet values for idea sets, index-mode-aware MiniSearch fields and card footer (member count), facet types derived from the rendered facet panels.
-- `theme/style.css` — no changes expected (reuses existing facet/card styles).
+- `build.py` - enrich `ideaset_catalogue_items` with `id` and aggregated facet fields; render the ideasets landing page with `search_index="ideasets"` and `facet_groups` excluding `ideasets`.
+- `templates/catalogue.html.j2` - render the search experience block when `search_index` is set (facet panels from the passed `facet_groups`, `#search-page` with `data-index="ideasets"`), and keep the landing card grid otherwise.
+- `theme/app.js` - generalize `initPage()`: item source by `data-index` (`ideas` vs `catalogues.ideasets`), aggregated facet values for idea sets, index-mode-aware MiniSearch fields and card footer (member count), facet types derived from the rendered facet panels.
+- `theme/style.css` - no changes expected (reuses existing facet/card styles).
 - `openspec/specs/ideaset-landing-search/spec.md` (new), `openspec/specs/build-engine/spec.md` and `openspec/specs/site-output/spec.md` (deltas).
 
 No changes to `content/` (user inputs). No new dependencies; MiniSearch and Tom Select are already vendored.

@@ -18,17 +18,17 @@ Individual idea set pages (`/ideasets/{slug}/`) currently hide each member idea 
 
 ### Modified Capabilities
 
-- `build-engine`: The idea set page member payload changes from accordion-only fields to full-content card fields — `title`, `url`, `description`, `image_urls`, `content_html`, plus `footer_badges` derived from the active catalogue configuration (REQ-BE-014).
+- `build-engine`: The idea set page member payload changes from accordion-only fields to full-content card fields - `title`, `url`, `description`, `image_urls`, `content_html`, plus `footer_badges` derived from the active catalogue configuration (REQ-BE-014).
 - `site-output`: The idea set page output changes from a Bootstrap accordion to the single-column card list with progressive reveal; it continues to exclude the catalogue search experience (REQ-SO-013).
 
 ## Impact
 
 Files created or updated:
 
-- `build.py` — enrich each idea set page member payload with `footer_badges` (reusing `footer_badges_for`) for the active footer-enabled catalogue types.
-- `templates/ideaset.html.j2` — replace the accordion markup with the single-column card list (`#ideaset-cards`), each card with title, photos, `content_html`, and footer badges, plus a reveal sentinel; load `assets/app.js`.
-- `theme/app.js` — add `initIdeasetCards()` that reveals one pre-rendered card per scroll step via an IntersectionObserver sentinel and shows an end-of-list marker.
-- `theme/style.css` — single-column card list styling (stacked full-width cards) and any sentinel/card spacing rules.
+- `build.py` - enrich each idea set page member payload with `footer_badges` (reusing `footer_badges_for`) for the active footer-enabled catalogue types.
+- `templates/ideaset.html.j2` - replace the accordion markup with the single-column card list (`#ideaset-cards`), each card with title, photos, `content_html`, and footer badges, plus a reveal sentinel; load `assets/app.js`.
+- `theme/app.js` - add `initIdeasetCards()` that reveals one pre-rendered card per scroll step via an IntersectionObserver sentinel and shows an end-of-list marker.
+- `theme/style.css` - single-column card list styling (stacked full-width cards) and any sentinel/card spacing rules.
 - `openspec/specs/ideaset-page-cards/spec.md` (new), `openspec/specs/build-engine/spec.md` and `openspec/specs/site-output/spec.md` (deltas).
 
 No changes to `content/` (user inputs). No new dependencies; MiniSearch, Tom Select, Bootstrap collapse JS are not required on these pages.

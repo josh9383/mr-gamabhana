@@ -51,11 +51,11 @@ CATALOGUE_DEFS = {
 }
 ```
 
-Each tuple is `(path_name, title, description, idea_field, mode)` where mode `single` reads the scalar field and mode `multi` reads the array field. `catalogue_attributes` from `site.json` selects the subset to build. Rationale: the build becomes a pure projection of configuration; adding a catalogue later is a one-line change. Alternative considered: hardcoding the old six — rejected because it contradicts the new config-driven contract.
+Each tuple is `(path_name, title, description, idea_field, mode)` where mode `single` reads the scalar field and mode `multi` reads the array field. `catalogue_attributes` from `site.json` selects the subset to build. Rationale: the build becomes a pure projection of configuration; adding a catalogue later is a one-line change. Alternative considered: hardcoding the old six - rejected because it contradicts the new config-driven contract.
 
 ### D2. Idea identity and normalization happen in one pass
 
-`load_ideas()` derives `idea["id"]` from the folder name, defaults `description` to `""`, coerces `categories`/`concepts`/`props`/`ideasets` to lists, and then enriches every record with `board_slug`, `standard_slug`, `subject_slug`, `category_slugs`, `concept_slugs`, `prop_slugs`, `ideaset_slugs`, and `image_urls`. Card payloads and the client index are built only from these normalized records so templates and JS never see raw field shapes. Alternative: patching at each render site — rejected as error-prone.
+`load_ideas()` derives `idea["id"]` from the folder name, defaults `description` to `""`, coerces `categories`/`concepts`/`props`/`ideasets` to lists, and then enriches every record with `board_slug`, `standard_slug`, `subject_slug`, `category_slugs`, `concept_slugs`, `prop_slugs`, `ideaset_slugs`, and `image_urls`. Card payloads and the client index are built only from these normalized records so templates and JS never see raw field shapes. Alternative: patching at each render site - rejected as error-prone.
 
 ### D3. Idea set records are derived in the build, not duplicated in content
 
@@ -72,7 +72,7 @@ Membership is by matching the idea's `ideasets` values against the ideaset keys 
 
 ### D4. Home facets = `catalogue_attributes` + standard + subject
 
-Per the accepted decision, the home page renders one facet panel per active `catalogue_attributes` entry (in the order given in `site.json`), followed by `standard` and `subject`. Board is not a facet and has no page. Facet values for an idea set are its aggregated member values (D3). The facet "type" keys sent to the client are exactly these names (`categories`, `concepts`, `props`, `standard`, `subject`) and double as the URL query parameter names (replacing the old `category`, `concept`, `prop` params — a deliberate, approved break).
+Per the accepted decision, the home page renders one facet panel per active `catalogue_attributes` entry (in the order given in `site.json`), followed by `standard` and `subject`. Board is not a facet and has no page. Facet values for an idea set are its aggregated member values (D3). The facet "type" keys sent to the client are exactly these names (`categories`, `concepts`, `props`, `standard`, `subject`) and double as the URL query parameter names (replacing the old `category`, `concept`, `prop` params - a deliberate, approved break).
 
 ### D5. The client index switches from ideas to idea sets
 
@@ -102,7 +102,7 @@ Catalogue pages and the `site/ideas/index.html` all-ideas landing (kept, since i
 
 ### D8. Representative image carousel shuffles client-side
 
-Each idea set card on the home page renders a `card-carousel` from `representative_image_urls` (capped at 6, reusing the existing crossfade keyframes) after a Fisher–Yates shuffle performed at render time in `app.js`. With no representative images the card shows `/assets/card-fallback.png`. Rationale: keeps the build deterministic while satisfying "displayed in random order"; alternative — shuffling in Python — was rejected because it would make output non-deterministic across builds.
+Each idea set card on the home page renders a `card-carousel` from `representative_image_urls` (capped at 6, reusing the existing crossfade keyframes) after a Fisher–Yates shuffle performed at render time in `app.js`. With no representative images the card shows `/assets/card-fallback.png`. Rationale: keeps the build deterministic while satisfying "displayed in random order"; alternative - shuffling in Python - was rejected because it would make output non-deterministic across builds.
 
 ### D9. Idea set search state and copy
 
@@ -127,4 +127,4 @@ The home page URL state now uses `q` plus the five facet types (`categories`, `c
 
 ## Open Questions
 
-- None blocking. (Minor copy decisions — result label `संच`, idea set page description — were fixed here as reasonable defaults and can be revisited during implementation.)
+- None blocking. (Minor copy decisions - result label `संच`, idea set page description - were fixed here as reasonable defaults and can be revisited during implementation.)

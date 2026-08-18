@@ -26,12 +26,12 @@ After `catalogue-config-refactor`, the `catalogues` node in `content/site.json` 
 ## Impact
 
 - **Files created/updated:**
-  - `build.py` — normalize `menu`/`footer` to default true in `load_catalogue_defs`; derive `menu_groups` and `footer_types`; add `footer_badges_for(idea, ...)`; add `footer_badges` to `idea_card` and `home_idea_items`; pass `menu_groups` in `base_context`.
-  - `templates/home.html.j2`, `templates/catalogue.html.j2`, `templates/idea.html.j2`, `templates/ideaset.html.j2` — navbar menu links from `menu_groups`.
-  - `templates/catalogue.html.j2` — idea card footer badges from `item.footer_badges` (landing cards keep the count footer).
-  - `theme/app.js` — `cardHtml` renders `idea.footer_badges` (replacing the props-only footer).
-  - `site/` — regenerated output (including `meta.json` with `footer_badges`).
-- **Unchanged:** `content/` (no edits — defaults apply), catalogue page generation, facets and URL state, payload top-level shape, and per-idea `meta.json` records.
+  - `build.py` - normalize `menu`/`footer` to default true in `load_catalogue_defs`; derive `menu_groups` and `footer_types`; add `footer_badges_for(idea, ...)`; add `footer_badges` to `idea_card` and `home_idea_items`; pass `menu_groups` in `base_context`.
+  - `templates/home.html.j2`, `templates/catalogue.html.j2`, `templates/idea.html.j2`, `templates/ideaset.html.j2` - navbar menu links from `menu_groups`.
+  - `templates/catalogue.html.j2` - idea card footer badges from `item.footer_badges` (landing cards keep the count footer).
+  - `theme/app.js` - `cardHtml` renders `idea.footer_badges` (replacing the props-only footer).
+  - `site/` - regenerated output (including `meta.json` with `footer_badges`).
+- **Unchanged:** `content/` (no edits - defaults apply), catalogue page generation, facets and URL state, payload top-level shape, and per-idea `meta.json` records.
 - **Dependencies:** None new.
 - **Constraints, Limitations, Assumptions:**
   - The `menu` flag controls navbar visibility only; it does not affect catalogue page generation.

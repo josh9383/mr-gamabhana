@@ -29,14 +29,14 @@ The site generates a faceted search experience (`initPage()` in `theme/app.js`) 
 
 All existing machinery (matchesFacets, filteredByOthers counts, autosuggest, URL state, infinite scroll, reset) then works unchanged over the chosen item list.
 
-- Alternative considered: a separate `initIdeasetSearch()` — rejected as duplication of ~400 lines of state/search logic, contradicting the "centralized coordinator" rule.
-- Alternative considered: filtering `data.ideas` on the ideasets page — rejected: the page lists idea sets, not ideas.
+- Alternative considered: a separate `initIdeasetSearch()` - rejected as duplication of ~400 lines of state/search logic, contradicting the "centralized coordinator" rule.
+- Alternative considered: filtering `data.ideas` on the ideasets page - rejected: the page lists idea sets, not ideas.
 
 ### D2. Facet types derive from the rendered facet panels (single source of truth)
 
-The client reads the active facet types from the DOM (`facetsRoot.querySelectorAll(".facet")` dataset) instead of `data.site.facet_types`. For home and individual catalogue pages the rendered panels come from the same config-driven `facet_groups` list as `facet_types`, so behavior is unchanged; on the ideasets landing page the build passes a `facet_groups` list that excludes `ideasets`, so the client naturally has no ideasets facet — no special-casing in JS.
+The client reads the active facet types from the DOM (`facetsRoot.querySelectorAll(".facet")` dataset) instead of `data.site.facet_types`. For home and individual catalogue pages the rendered panels come from the same config-driven `facet_groups` list as `facet_types`, so behavior is unchanged; on the ideasets landing page the build passes a `facet_groups` list that excludes `ideasets`, so the client naturally has no ideasets facet - no special-casing in JS.
 
-- Alternative considered: a `data-facet-types` JSON attribute — rejected: redundant with the rendered panels and adds a second source of truth.
+- Alternative considered: a `data-facet-types` JSON attribute - rejected: redundant with the rendered panels and adds a second source of truth.
 - Fallback: if no `.facets` root exists, fall back to `data.site.facet_types`.
 
 ### D3. Template renders the search block for `search_index` and guards locked-facet access
@@ -45,7 +45,7 @@ The search block condition becomes `{% if locked_facet or search_index %}`. Insi
 
 ### D4. Build enriches idea set records and special-cases the ideasets landing render
 
-`ideaset_catalogue_items` exposes each idea set's `id`, `standards`, `subjects`, `categories`/`category_slugs`, `concepts`/`concept_slugs`, `props`/`prop_slugs` (already aggregated by `build_ideasets`) — the same items feed both the landing page render and `meta.json`'s `catalogues.ideasets`, keeping a single source. In the catalogue loop, the `ideasets` landing page is rendered before the `continue` guard with `search_index="ideasets"` and `facet_groups` minus `ideasets`.
+`ideaset_catalogue_items` exposes each idea set's `id`, `standards`, `subjects`, `categories`/`category_slugs`, `concepts`/`concept_slugs`, `props`/`prop_slugs` (already aggregated by `build_ideasets`) - the same items feed both the landing page render and `meta.json`'s `catalogues.ideasets`, keeping a single source. In the catalogue loop, the `ideasets` landing page is rendered before the `continue` guard with `search_index="ideasets"` and `facet_groups` minus `ideasets`.
 
 ### D5. Ideaset cards show the member count, idea cards keep badges
 

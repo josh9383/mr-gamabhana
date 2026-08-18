@@ -29,5 +29,5 @@
 
 - [x] 5.1 Run `python build.py` and confirm the site builds with no errors
 - [x] 5.2 Verify generated `site/`: `ideas.json` exists (no `index.json`), payload has `site`/`ideas`/`catalogues`, and all URLs match generated pages
-- [x] 5.3 Run a repo-wide grep for `index.json` — only archived changes and Marathi literals may reference it; no live code
+- [x] 5.3 Run a repo-wide grep for `index.json` - only archived changes and Marathi literals may reference it; no live code
 - [x] 5.4 Confirm per-idea output (`site/ideas/{id}/index.html`, `index.md`) and catalogue pages are byte-identical in structure to the pre-change build
