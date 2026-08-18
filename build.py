@@ -179,7 +179,7 @@ def load_ideas(ideaset_map):
 
 
 def load_idea_content(idea):
-    return (CONTENT / "ideas" / idea["id"] / "meta.md").read_text(
+    return (CONTENT / "ideas" / idea["id"] / "script.md").read_text(
         encoding="utf-8"
     )
 

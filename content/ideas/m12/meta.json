@@ -6,8 +6,8 @@
   "standard": 4,
   "subject": "गणित",
   "categories": ["वर्गातील प्रयोग"],
-  "concepts": ["अंतर", "लांबी", "एकक रूपांतर", "मापन"],
-  "images": ["1.jpg","2,jpg"],
+  "concepts": ["अंतर", "लांबी", "एकक" ,"रूपांतर", "मापन"],
+  "images": ["1.jpg","2.jpg"],
   "rating": {
     "relevance": 5,
     "experience": 4,
