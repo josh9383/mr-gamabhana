@@ -1,0 +1,16 @@
+{
+  "title": "त्रिकोणी पताकेची परिमिती मोजूया",
+  "props": ["पताका", "पट्टी"],
+  "ideasets": ["परिमिती"],
+  "board": "महाराष्ट्र राज्य मंडळ",
+  "standard": 4,
+  "subject": "गणित",
+  "categories": ["वर्गातील प्रयोग"],
+  "concepts": ["परिमिती", "लांबी", "आकार"],
+  "images": ["1.jpg"],
+  "rating": {
+    "relevance": 4,
+    "experience": 4,
+    "resources": 4
+  }
+}
