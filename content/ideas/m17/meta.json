@@ -6,7 +6,7 @@
   "standard": 4,
   "subject": "गणित",
   "categories": ["वर्गातील प्रयोग"],
-  "concepts": ["परिमिती","लांबी", "आकार"],
+  "concepts": ["परिमिती","लांबी", "आकार", "एकक"],
   "images": ["1.jpg"],
   "rating": {
     "relevance": 4,
