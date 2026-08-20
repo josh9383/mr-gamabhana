@@ -74,6 +74,17 @@
             </div>
             {% endif %}
 
+            {% if not audio_urls or audio_urls|length == 0 %}
+                <!-- no audio -->
+            {% else %}
+            {% set num_tracks = audio_urls|length if audio_urls|length <= 6 else 6 %}
+            <div class="row audio-tracks">
+                {% for audio_url in audio_urls[:6] %}
+                <div class="col" ><audio controls src="{{ site.base_url }}{{ audio_url }}" alt="{{ title }}" loading="lazy" ></audio></div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
             <div class="idea-content mt-3">{{ content_html }}</div>
         </div>
         {% if footer_badges %}

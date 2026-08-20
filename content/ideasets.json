@@ -4,5 +4,6 @@
     "मापन": {"title" : "मापन", "slug": "measurement"},
     "परिमिती": {"title" : "परिमिती", "slug": "perimeter"},
     "क्षेत्रफळ": {"title" : "क्षेत्रफळ", "slug": "area"},
-    "चित्रालेख": {"title" : "चित्रालेख", "slug": "pictograph"}
+    "चित्रालेख": {"title" : "चित्रालेख", "slug": "pictograph"},
+    "दिनदर्शिका": {"title" : "दिनदर्शिका", "slug": "calendar"}
 }

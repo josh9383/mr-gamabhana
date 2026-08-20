@@ -160,6 +160,12 @@ def enrich_idea(idea, ideaset_map):
         for img in raw_images
         if str(img).strip()
     ]
+    raw_tracks = idea.get("audio") or []
+    idea["audio_urls"] = [
+        f"/ideas/{idea['id']}/{str(track).strip()}"
+        for track in raw_tracks
+        if str(track).strip()
+    ]
 
 
 def load_ideas(ideaset_map):
@@ -296,6 +302,7 @@ def idea_card(idea, catalogue_defs, footer_types):
         "props": idea["props"],
         "prop_slugs": idea["prop_slugs"],
         "image_urls": idea["image_urls"],
+        "audio_urls": idea["audio_urls"],
         "footer_badges": footer_badges_for(idea, catalogue_defs, footer_types),
         "count": None,
     }
@@ -320,6 +327,7 @@ def home_idea_items(ideas, catalogue_defs, footer_types):
             "ideasets": idea["ideasets"],
             "ideaset_slugs": idea["ideaset_slugs"],
             "image_urls": idea["image_urls"],
+            "audio_urls": idea["audio_urls"],
             "footer_badges": footer_badges_for(idea, catalogue_defs, footer_types),
         }
         for idea in ideas
@@ -466,6 +474,13 @@ def main():
                 source_img = CONTENT / "ideas" / idea["id"] / img_name
                 if source_img.exists():
                     shutil.copy(source_img, output_dir / img_name)
+
+        for track in idea.get("audio") or []:
+            track_name = str(track).strip()
+            if track_name:
+                source_track = CONTENT / "ideas" / idea["id"] / track_name
+                if source_track.exists():
+                    shutil.copy(source_track, output_dir / track_name)
 
         (output_dir / "index.md").write_text(
             md_template.render(**context),
