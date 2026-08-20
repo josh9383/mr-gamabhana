@@ -1,0 +1,16 @@
+{
+  "title": "फुली-गोळा खेळातून क्षेत्रफळाची ओळख",
+  "props": ["फळा", "खडू"],
+  "ideasets": ["क्षेत्रफळ"],
+  "board": "महाराष्ट्र राज्य मंडळ",
+  "standard": 4,
+  "subject": "गणित",
+  "categories": ["वर्गातील प्रयोग"],
+  "concepts": ["क्षेत्रफळ", "एकक" ,"चौरस", "मापना"],
+  "images": ["1.jpg","2.jpg"],
+  "rating": {
+    "relevance": 4,
+    "experience": 4,
+    "resources": 5
+  }
+}
